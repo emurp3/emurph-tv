@@ -48,3 +48,5 @@ jobs:
           path: EMurph-TV-nightly.apk
           if-no-files-found: error
           retention-days: 14
+
+# Build trigger refreshed for the branded gradient release on 2026-07-19.
