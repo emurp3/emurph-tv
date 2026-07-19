@@ -18,9 +18,11 @@ The first build includes:
 
 ## Build
 
-GitHub Actions automatically creates a debug APK after every push to `main`.
+GitHub Actions automatically creates a debug APK after every push to `main` and validates pull requests.
 
 Open **Actions → Build EMurph TV APK → latest run → Artifacts** and download `EMurph-TV-debug`.
+
+The generated `EMurph-TV-nightly.apk` is suitable for sideload testing on Amazon Fire TV devices.
 
 ## Security
 
