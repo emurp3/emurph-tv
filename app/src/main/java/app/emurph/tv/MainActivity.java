@@ -26,14 +26,19 @@ public class MainActivity extends Activity {
     private ExoPlayer player;
     private WebView web;
     private String activeProfile = "";
-    private final String defaultRadioUrl = "http://34.26.99.249:8080/";
+    private final String defaultRadioUrl = "http://34.26.99.249:8000/emurph";
+    private final String defaultServerUrl = "http://limited-name.com:80";
+    private final String remoteConfigUrl = "http://34.26.99.249:8080/tv_config.json";
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         prefs = getSharedPreferences("emurph_tv", MODE_PRIVATE);
         activeProfile = prefs.getString("active_profile", "");
+        if (!prefs.contains("server_url")) prefs.edit().putString("server_url", defaultServerUrl).apply();
+        if (!prefs.contains("radio_url")) prefs.edit().putString("radio_url", defaultRadioUrl).apply();
         showHome();
+        new Thread(this::refreshRemoteConfig).start();
     }
 
     @Override protected void onDestroy() {
@@ -65,6 +70,12 @@ public class MainActivity extends Activity {
     private String homeHtml() {
         String user = activeProfile.isEmpty() ? "No user" : esc(activeProfile);
         String expiration = esc(expiration());
+        String announcementHtml = "";
+        if (prefs.getBoolean("announcement_enabled", false)) {
+            String at = esc(prefs.getString("announcement_title", ""));
+            String am = esc(prefs.getString("announcement_message", ""));
+            announcementHtml = "<div style='position:fixed;left:34px;right:34px;bottom:66px;z-index:30;background:linear-gradient(90deg,#b31239,#6c1631);border:1px solid #ff5579;border-radius:9px;padding:11px 18px;color:#fff;font-size:15px;box-shadow:0 8px 26px rgba(0,0,0,.45)'><b>" + at + "</b> " + am + "</div>";
+        }
         return "<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'>" +
         "<style>" +
         "*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020510;color:#fff;font-family:Arial,Helvetica,sans-serif}" +
@@ -78,7 +89,7 @@ public class MainActivity extends Activity {
         ".features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.feature{border:1px solid #263653;border-radius:12px;background:linear-gradient(180deg,#0c1428,#070d1c);display:flex;align-items:center;padding:0 24px;gap:16px}.feature .fi{font-size:34px}.feature b{display:block;font-size:18px}.feature small{color:#aebbd2;font-size:13px}" +
         ".footer{border:1px solid #1d2b48;border-radius:10px;background:#080e1d;display:flex;align-items:center;justify-content:space-between;padding:0 18px;color:#b8c3d8;font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,.25)}.footer strong{color:#ff4569}" +
         "[tabindex]{outline:none;transition:.12s transform,.12s box-shadow,.12s border-color}[tabindex]:focus{transform:scale(1.035);border-color:#eaf2ff!important;box-shadow:0 0 0 3px #1b71ff,0 0 22px #ff315d!important;z-index:10}" +
-        "</style></head><body><div class='studio'></div><div class='wrap'>" +
+        "</style></head><body>" + announcementHtml + "<div class='studio'></div><div class='wrap'>" +
         "<div class='top'><div class='logo'>EMurph <b>TV</b></div><div class='search' tabindex='1' onclick='EMurph.masterSearch()'>⌕ &nbsp; Master Search</div><div class='icon' tabindex='2' onclick='EMurph.message(\"No new notifications\")'>🔔</div><div class='icon' tabindex='3' onclick='EMurph.users()'>👤</div><div class='icon' tabindex='4' onclick='EMurph.message(\"Recording controls are being finalized\")'>REC</div><div class='icon' tabindex='5' onclick='EMurph.settings()'>⚙</div></div>" +
         "<div class='cards'><div class='card live' tabindex='6' onclick='EMurph.browse(\"live\")'><div class='art'>▣</div><h2>LIVE TV</h2><p>Watch Live Channels</p></div>" +
         "<div class='card movies' tabindex='7' onclick='EMurph.browse(\"movie\")'><div class='art'>◉</div><h2>MOVIES</h2><p>Thousands of Movies</p></div>" +
@@ -130,9 +141,10 @@ public class MainActivity extends Activity {
         LinearLayout art=new LinearLayout(this);art.setOrientation(LinearLayout.VERTICAL);art.setGravity(Gravity.CENTER);art.addView(label("🎙",84,Color.rgb(76,126,255),false));art.addView(label("EMurph RADIO",30,Color.WHITE,true));art.addView(label("STREAM • LISTEN • INSPIRE",14,Color.rgb(255,77,111),true));root.addView(art,new LinearLayout.LayoutParams(0,-1,.9f));
         LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(dp(25),dp(10),dp(25),dp(10));form.setBackground(panel(Color.rgb(8,14,29),Color.rgb(43,61,96),16,1));
         TextView title=label("Enter Your Login Details",28,Color.WHITE,true);title.setGravity(Gravity.CENTER);form.addView(title,new LinearLayout.LayoutParams(-1,dp(66)));
-        EditText n=input("Profile Name"),u=input("Username"),p=input("Password"),s=input("Server URL");p.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        for(EditText e:new EditText[]{n,u,p,s}){form.addView(e,new LinearLayout.LayoutParams(-1,dp(58)));form.addView(space(1,dp(11)));}
-        form.addView(button("ADD USER",Color.rgb(210,31,69),v->addUser(n,u,p,s)),new LinearLayout.LayoutParams(-1,dp(58)));form.addView(space(1,dp(12)));form.addView(button("LIST USERS",Color.rgb(16,31,63),v->showUsers()),new LinearLayout.LayoutParams(-1,dp(52)));
+        EditText n=input("Profile Name"),u=input("Username"),p=input("Password");p.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        for(EditText e:new EditText[]{n,u,p}){form.addView(e,new LinearLayout.LayoutParams(-1,dp(58)));form.addView(space(1,dp(11)));}
+        TextView managed=label("Server address is managed automatically by EMurph TV.",14,Color.rgb(140,155,184),false);managed.setGravity(Gravity.CENTER);form.addView(managed,new LinearLayout.LayoutParams(-1,dp(42)));
+        form.addView(button("ADD USER",Color.rgb(210,31,69),v->addUser(n,u,p)),new LinearLayout.LayoutParams(-1,dp(58)));form.addView(space(1,dp(12)));form.addView(button("LIST USERS",Color.rgb(16,31,63),v->showUsers()),new LinearLayout.LayoutParams(-1,dp(52)));
         root.addView(form,new LinearLayout.LayoutParams(0,-1,1.15f));setContentView(root);
     }
 
@@ -141,13 +153,54 @@ public class MainActivity extends Activity {
 
     private void browseNative(String type){ if(!hasActiveUser()){toast("Add or select an IPTV user first.");showUsers();return;} LinearLayout root=new LinearLayout(this);root.setGravity(Gravity.CENTER);root.setBackgroundColor(Color.rgb(2,5,16));ProgressBar pb=new ProgressBar(this);root.addView(pb);setContentView(root);new Thread(()->{JSONArray arr=new JSONArray();try{JSONObject p=profile(activeProfile);String action=type.equals("live")?"get_live_streams":type.equals("movie")?"get_vod_streams":"get_series";arr=getArray(api(p)+"&action="+action);}catch(Exception ignored){}JSONArray result=arr;runOnUiThread(()->showResults(type.toUpperCase(Locale.US),result));}).start(); }
     private void showResults(String title,JSONArray arr){ LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(30),dp(20),dp(30),dp(20));root.setBackgroundColor(Color.rgb(2,5,16));LinearLayout top=new LinearLayout(this);top.setGravity(Gravity.CENTER_VERTICAL);top.addView(button("← HOME",Color.rgb(16,31,63),v->showHome()),new LinearLayout.LayoutParams(dp(150),dp(52)));top.addView(label(title,27,Color.WHITE,true),new LinearLayout.LayoutParams(0,dp(58),1));root.addView(top);ScrollView scroll=new ScrollView(this);LinearLayout list=new LinearLayout(this);list.setOrientation(LinearLayout.VERTICAL);if(arr.length()==0){TextView n=label("No items returned.",18,Color.LTGRAY,false);n.setGravity(Gravity.CENTER);list.addView(n,new LinearLayout.LayoutParams(-1,dp(180)));}for(int i=0;i<Math.min(arr.length(),250);i++){JSONObject o=arr.optJSONObject(i);if(o==null)continue;String name=o.optString("name",o.optString("title","Untitled"));list.addView(button(name,Color.rgb(10,20,42),v->playItem(o)),new LinearLayout.LayoutParams(-1,dp(58)));list.addView(space(1,dp(7)));}scroll.addView(list);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));setContentView(root); }
-    private void playItem(JSONObject o){try{JSONObject p=profile(activeProfile);if(o.has("series_id")){toast("Episode browsing is coming in the next build.");return;}String id=o.optString("stream_id"),ext=o.optString("container_extension","m3u8");boolean movie="movie".equals(o.optString("stream_type"))||o.has("rating_5based");String url=p.optString("server")+"/"+(movie?"movie":"live")+"/"+enc(p.optString("username"))+"/"+enc(p.optString("password"))+"/"+id+"."+ext;showPlayer(o.optString("name","Playing"),url);}catch(Exception e){toast("Unable to build stream URL.");}}
+    private void playItem(JSONObject o){try{JSONObject p=profile(activeProfile);if(o.has("series_id")){showSeriesEpisodes(o);return;}String id=o.optString("stream_id"),ext=o.optString("container_extension","m3u8");boolean movie="movie".equals(o.optString("stream_type"))||o.has("rating_5based");String url=serverUrl()+"/"+(movie?"movie":"live")+"/"+enc(p.optString("username"))+"/"+enc(p.optString("password"))+"/"+id+"."+ext;showPlayer(o.optString("name","Playing"),url);}catch(Exception e){toast("Unable to build stream URL.");}}
+    private void showSeriesEpisodes(JSONObject series){
+        String seriesName=series.optString("name",series.optString("title","Series"));
+        String seriesId=series.optString("series_id");
+        LinearLayout loading=new LinearLayout(this);loading.setGravity(Gravity.CENTER);loading.setBackgroundColor(Color.rgb(2,5,16));loading.addView(new ProgressBar(this));setContentView(loading);
+        new Thread(()->{
+            JSONArray episodes=new JSONArray();
+            try{
+                JSONObject p=profile(activeProfile);
+                JSONObject info=getObject(api(p)+"&action=get_series_info&series_id="+enc(seriesId));
+                JSONObject seasons=info.optJSONObject("episodes");
+                if(seasons!=null){
+                    Iterator<String> keys=seasons.keys();
+                    while(keys.hasNext()){
+                        JSONArray season=seasons.optJSONArray(keys.next());
+                        if(season==null)continue;
+                        for(int i=0;i<season.length();i++){JSONObject e=season.optJSONObject(i);if(e!=null)episodes.put(e);}
+                    }
+                }
+            }catch(Exception ignored){}
+            JSONArray result=episodes;
+            runOnUiThread(()->showEpisodeResults(seriesName,result));
+        }).start();
+    }
+    private void showEpisodeResults(String title,JSONArray episodes){
+        LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(30),dp(20),dp(30),dp(20));root.setBackgroundColor(Color.rgb(2,5,16));
+        LinearLayout top=new LinearLayout(this);top.setGravity(Gravity.CENTER_VERTICAL);top.addView(button("← SERIES",Color.rgb(16,31,63),v->browseNative("series")),new LinearLayout.LayoutParams(dp(160),dp(52)));top.addView(label(title,27,Color.WHITE,true),new LinearLayout.LayoutParams(0,dp(58),1));root.addView(top);
+        ScrollView scroll=new ScrollView(this);LinearLayout list=new LinearLayout(this);list.setOrientation(LinearLayout.VERTICAL);
+        if(episodes.length()==0){TextView n=label("No episodes returned.",18,Color.LTGRAY,false);n.setGravity(Gravity.CENTER);list.addView(n,new LinearLayout.LayoutParams(-1,dp(180)));}
+        for(int i=0;i<episodes.length();i++){JSONObject episode=episodes.optJSONObject(i);if(episode==null)continue;String name=episode.optString("title","Episode "+(i+1));list.addView(button(name,Color.rgb(10,20,42),v->playEpisode(episode)),new LinearLayout.LayoutParams(-1,dp(58)));list.addView(space(1,dp(7)));}
+        scroll.addView(list);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));setContentView(root);
+    }
+    private void playEpisode(JSONObject episode){
+        try{
+            JSONObject p=profile(activeProfile);
+            String id=episode.optString("id");
+            String ext=episode.optString("container_extension","mp4");
+            String url=serverUrl()+"/series/"+enc(p.optString("username"))+"/"+enc(p.optString("password"))+"/"+id+"."+ext;
+            showPlayer(episode.optString("title","Episode"),url);
+        }catch(Exception e){toast("Unable to play this episode.");}
+    }
+
     private void showPlayer(String title,String url){releasePlayer();LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setBackgroundColor(Color.BLACK);TextView back=button("← HOME  •  "+title,Color.rgb(10,20,42),v->showHome());root.addView(back,new LinearLayout.LayoutParams(-1,dp(52)));PlayerView view=new PlayerView(this);player=new ExoPlayer.Builder(this).build();view.setPlayer(player);player.setMediaItem(MediaItem.fromUri(Uri.parse(url)));player.prepare();player.play();root.addView(view,new LinearLayout.LayoutParams(-1,0,1));setContentView(root);}
     private void showRadio(){releasePlayer();LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(34),dp(25),dp(34),dp(25));root.setGravity(Gravity.CENTER);root.setBackgroundColor(Color.rgb(2,5,16));root.addView(label("📻",88,Color.WHITE,false));root.addView(label("EMurph RADIO",38,Color.WHITE,true));root.addView(label("Urban Contemporary Gospel",19,Color.rgb(180,196,222),false));TextView status=label("Ready",16,Color.rgb(180,196,222),false);status.setGravity(Gravity.CENTER);root.addView(status);root.addView(space(1,dp(22)));root.addView(button("▶ PLAY RADIO",Color.rgb(210,31,69),v->{releasePlayer();player=new ExoPlayer.Builder(this).build();player.setMediaItem(MediaItem.fromUri(Uri.parse(prefs.getString("radio_url",defaultRadioUrl))));player.prepare();player.play();status.setText("Now Playing");}),new LinearLayout.LayoutParams(dp(440),dp(62)));root.addView(space(1,dp(14)));root.addView(button("← HOME",Color.rgb(16,31,63),v->showHome()),new LinearLayout.LayoutParams(dp(440),dp(54)));setContentView(root);}
     private void showSettings(){String[] options={"Switch User","Update EMurph Radio URL","Clear Saved Users","Cancel"};new AlertDialog.Builder(this).setTitle("EMurph TV Settings").setItems(options,(d,w)->{if(w==0)showUsers();else if(w==1)editRadioUrl();else if(w==2){prefs.edit().clear().apply();activeProfile="";showHome();}}).show();}
     private void editRadioUrl(){EditText e=input("Radio URL");e.setText(prefs.getString("radio_url",defaultRadioUrl));new AlertDialog.Builder(this).setTitle("EMurph Radio URL").setView(e).setPositiveButton("Save",(d,w)->prefs.edit().putString("radio_url",e.getText().toString().trim()).apply()).setNegativeButton("Cancel",null).show();}
 
-    private void addUser(EditText n,EditText u,EditText p,EditText s){String name=n.getText().toString().trim(),user=u.getText().toString().trim(),pass=p.getText().toString(),server=s.getText().toString().trim();if(name.isEmpty()||user.isEmpty()||pass.isEmpty()||server.isEmpty()){toast("Complete all four fields.");return;}if(server.endsWith("/"))server=server.substring(0,server.length()-1);String fs=server;toast("Checking login…");new Thread(()->{try{JSONObject response=getObject(fs+"/player_api.php?username="+enc(user)+"&password="+enc(pass));JSONObject info=response.optJSONObject("user_info");if(info==null)throw new Exception("No account data returned");JSONObject obj=new JSONObject();obj.put("name",name);obj.put("username",user);obj.put("password",pass);obj.put("server",fs);obj.put("exp",info.optString("exp_date",""));JSONArray arr=new JSONArray(prefs.getString("profiles","[]"));for(int i=arr.length()-1;i>=0;i--)if(arr.optJSONObject(i).optString("name").equals(name))arr.remove(i);arr.put(obj);prefs.edit().putString("profiles",arr.toString()).putString("active_profile",name).apply();activeProfile=name;runOnUiThread(this::showHome);}catch(Exception e){runOnUiThread(()->toast("Login failed: "+e.getMessage()));}}).start();}
+    private void addUser(EditText n,EditText u,EditText p){String name=n.getText().toString().trim(),user=u.getText().toString().trim(),pass=p.getText().toString(),server=serverUrl();if(name.isEmpty()||user.isEmpty()||pass.isEmpty()){toast("Complete all three fields.");return;}String fs=server;toast("Checking login…");new Thread(()->{try{JSONObject response=getObject(fs+"/player_api.php?username="+enc(user)+"&password="+enc(pass));JSONObject info=response.optJSONObject("user_info");if(info==null)throw new Exception("No account data returned");JSONObject obj=new JSONObject();obj.put("name",name);obj.put("username",user);obj.put("password",pass);obj.put("server",fs);obj.put("exp",info.optString("exp_date",""));JSONArray arr=new JSONArray(prefs.getString("profiles","[]"));for(int i=arr.length()-1;i>=0;i--)if(arr.optJSONObject(i).optString("name").equals(name))arr.remove(i);arr.put(obj);prefs.edit().putString("profiles",arr.toString()).putString("active_profile",name).apply();activeProfile=name;runOnUiThread(this::showHome);}catch(Exception e){runOnUiThread(()->toast("Login failed: "+e.getMessage()));}}).start();}
 
     private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setPadding(dp(14),dp(8),dp(14),dp(8));if(bold)t.setTypeface(android.graphics.Typeface.DEFAULT,android.graphics.Typeface.BOLD);return t;}
     private TextView button(String text,int color,View.OnClickListener click){TextView b=label(text,18,Color.WHITE,true);b.setGravity(Gravity.CENTER);b.setFocusable(true);b.setClickable(true);b.setBackground(panel(color,Color.rgb(65,82,118),12,1));b.setOnClickListener(click);focusGlow(b);return b;}
@@ -160,9 +213,24 @@ public class MainActivity extends Activity {
     private void releasePlayer(){if(player!=null){player.release();player=null;}}
     private boolean hasActiveUser(){return !activeProfile.isEmpty();}
     private JSONObject profile(String name)throws Exception{JSONArray a=new JSONArray(prefs.getString("profiles","[]"));for(int i=0;i<a.length();i++){JSONObject p=a.getJSONObject(i);if(name.equals(p.optString("name")))return p;}throw new Exception("Profile not found");}
-    private String api(JSONObject p)throws Exception{return p.getString("server")+"/player_api.php?username="+enc(p.getString("username"))+"&password="+enc(p.getString("password"));}
+    private String api(JSONObject p)throws Exception{return serverUrl()+"/player_api.php?username="+enc(p.getString("username"))+"&password="+enc(p.getString("password"));}
     private String expiration(){if(activeProfile.isEmpty())return "Not connected";try{String x=profile(activeProfile).optString("exp","");if(x.isEmpty()||"null".equals(x))return "Unknown";long sec=Long.parseLong(x);return new SimpleDateFormat("MMMM d, yyyy",Locale.US).format(new Date(sec*1000));}catch(Exception e){return "Unknown";}}
     private String enc(String s)throws Exception{return URLEncoder.encode(s,"UTF-8");}
+    private String serverUrl(){String s=prefs.getString("server_url",defaultServerUrl).trim();while(s.endsWith("/"))s=s.substring(0,s.length()-1);return s;}
+    private void refreshRemoteConfig(){
+        try{
+            JSONObject cfg=getObject(remoteConfigUrl+"?t="+System.currentTimeMillis());
+            String server=cfg.optString("iptv_url",defaultServerUrl).trim();
+            String radio=cfg.optString("radio_url",defaultRadioUrl).trim();
+            JSONObject a=cfg.optJSONObject("announcement");
+            SharedPreferences.Editor edit=prefs.edit();
+            if(server.startsWith("http://")||server.startsWith("https://"))edit.putString("server_url",server);
+            if(radio.startsWith("http://")||radio.startsWith("https://"))edit.putString("radio_url",radio);
+            if(a!=null){edit.putBoolean("announcement_enabled",a.optBoolean("enabled",false));edit.putString("announcement_title",a.optString("title",""));edit.putString("announcement_message",a.optString("message",""));}
+            edit.apply();
+            runOnUiThread(this::showHome);
+        }catch(Exception ignored){}
+    }
     private JSONObject getObject(String url)throws Exception{return new JSONObject(read(url));}
     private JSONArray getArray(String url)throws Exception{return new JSONArray(read(url));}
     private String read(String u)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL(u).openConnection();c.setConnectTimeout(12000);c.setReadTimeout(25000);c.setRequestProperty("User-Agent","EMurphTV/0.2");try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];for(int n;(n=in.read(b))>0;)out.write(b,0,n);return out.toString(StandardCharsets.UTF_8.name());}finally{c.disconnect();}}
