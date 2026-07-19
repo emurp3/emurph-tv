@@ -3,16 +3,17 @@ package app.emurph.tv;
 import android.app.*;
 import android.os.*;
 import android.content.*;
-import android.graphics.*;
-import android.graphics.drawable.*;
+import android.graphics.Color;
 import android.net.Uri;
 import android.text.InputType;
-import android.util.Base64;
 import android.view.*;
+import android.webkit.*;
 import android.widget.*;
+
 import androidx.media3.common.MediaItem;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
+
 import org.json.*;
 import java.io.*;
 import java.net.*;
@@ -21,105 +22,148 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class MainActivity extends Activity {
-    private final int BG=Color.rgb(2,6,18), PANEL=Color.rgb(8,15,34), TEXT=Color.WHITE;
-    private final int MUTED=Color.rgb(174,184,205), BLUE=Color.rgb(16,112,245), RED=Color.rgb(244,40,78), PURPLE=Color.rgb(109,52,210);
     private SharedPreferences prefs;
     private ExoPlayer player;
-    private String activeProfile="";
-    private final String defaultRadioUrl="http://34.26.99.249:8080/";
+    private WebView web;
+    private String activeProfile = "";
+    private final String defaultRadioUrl = "http://34.26.99.249:8080/";
 
-    @Override public void onCreate(Bundle b){
-        super.onCreate(b);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        prefs=getSharedPreferences("emurph_tv",MODE_PRIVATE);
-        activeProfile=prefs.getString("active_profile","");
+    @Override public void onCreate(Bundle state) {
+        super.onCreate(state);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        prefs = getSharedPreferences("emurph_tv", MODE_PRIVATE);
+        activeProfile = prefs.getString("active_profile", "");
         showHome();
     }
 
-    private int dp(int n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
-    private GradientDrawable box(int fill,int radius,int stroke,int sw){GradientDrawable g=new GradientDrawable();g.setColor(fill);g.setCornerRadius(dp(radius));if(sw>0)g.setStroke(dp(sw),stroke);return g;}
-    private GradientDrawable gradient(int[] colors,int radius){GradientDrawable g=new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,colors);g.setCornerRadius(dp(radius));return g;}
-    private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.CENTER_VERTICAL);t.setPadding(dp(14),dp(8),dp(14),dp(8));if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
-    private TextView action(String text,View.OnClickListener click){TextView b=label(text,17,TEXT,true);b.setGravity(Gravity.CENTER);b.setFocusable(true);b.setClickable(true);b.setBackground(box(Color.argb(70,8,15,34),12,Color.argb(120,120,145,190),1));b.setOnClickListener(click);b.setOnFocusChangeListener((v,f)->{v.animate().scaleX(f?1.05f:1f).scaleY(f?1.05f:1f).setDuration(120).start();v.setBackground(box(Color.argb(f?150:70,8,15,34),12,f?RED:Color.argb(120,120,145,190),f?3:1));});return b;}
-    private EditText input(String hint){EditText e=new EditText(this);e.setHint(hint);e.setHintTextColor(MUTED);e.setTextColor(TEXT);e.setTextSize(17);e.setSingleLine(true);e.setPadding(dp(18),0,dp(18),0);e.setBackground(box(PANEL,10,Color.rgb(78,94,132),1));return e;}
-    private void release(){if(player!=null){player.release();player=null;}}
-
-    private void showHome(){
-        release();
-        LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(34),dp(18),dp(34),dp(18));
-        root.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{Color.rgb(2,6,18),Color.rgb(7,12,30),Color.rgb(20,5,27)}));
-
-        LinearLayout header=new LinearLayout(this);header.setOrientation(LinearLayout.HORIZONTAL);header.setGravity(Gravity.CENTER_VERTICAL);
-        TextView logo=label("EMURPH ",30,TEXT,true);header.addView(logo);
-        TextView tv=label("TV",30,RED,true);header.addView(tv);
-        TextView search=action("⌕  Master Search",v->showSearch());header.addView(search,new LinearLayout.LayoutParams(0,dp(58),1));
-        Space hs=new Space(this);header.addView(hs,new LinearLayout.LayoutParams(dp(12),1));
-        header.addView(action("🔔",v->toast("No new notifications")),new LinearLayout.LayoutParams(dp(60),dp(58)));
-        Space hs2=new Space(this);header.addView(hs2,new LinearLayout.LayoutParams(dp(8),1));
-        header.addView(action("⚙",v->showSettings()),new LinearLayout.LayoutParams(dp(60),dp(58)));
-        Space hs3=new Space(this);header.addView(hs3,new LinearLayout.LayoutParams(dp(8),1));
-        header.addView(action("Switch User",v->showUsers()),new LinearLayout.LayoutParams(dp(155),dp(58)));
-        root.addView(header,new LinearLayout.LayoutParams(-1,dp(68)));
-
-        LinearLayout cards=new LinearLayout(this);cards.setOrientation(LinearLayout.HORIZONTAL);cards.setPadding(0,dp(16),0,dp(14));
-        cards.addView(homeCard("▣","LIVE TV","Watch Live Channels",new int[]{Color.rgb(15,75,175),Color.rgb(4,28,75)},v->browse("live")),new LinearLayout.LayoutParams(0,-1,1));
-        addGap(cards,12);
-        cards.addView(homeCard("◉","MOVIES","Thousands of Movies",new int[]{Color.rgb(202,46,52),Color.rgb(82,8,24)},v->browse("movie")),new LinearLayout.LayoutParams(0,-1,1));
-        addGap(cards,12);
-        cards.addView(homeCard("▱","SERIES","Binge Worthy Shows",new int[]{Color.rgb(111,50,202),Color.rgb(38,13,85)},v->browse("series")),new LinearLayout.LayoutParams(0,-1,1));
-        addGap(cards,12);
-        cards.addView(homeCard("📻","EMURPH RADIO","Urban Contemporary Gospel",new int[]{Color.rgb(10,19,43),Color.rgb(25,4,35)},v->showRadio()),new LinearLayout.LayoutParams(0,-1,1.08f));
-        root.addView(cards,new LinearLayout.LayoutParams(-1,0,1));
-
-        LinearLayout features=new LinearLayout(this);features.setOrientation(LinearLayout.HORIZONTAL);
-        features.addView(feature("▤","LIVE WITH EPG","See what's on now",v->browse("live")),new LinearLayout.LayoutParams(0,dp(78),1));
-        addGap(features,12);
-        features.addView(feature("▦","MULTI-SCREEN","Watch on multiple devices",v->toast("Multi-screen is staged for the next build.")),new LinearLayout.LayoutParams(0,dp(78),1));
-        addGap(features,12);
-        features.addView(feature("↶","CATCH UP","Never miss a moment",v->browse("live")),new LinearLayout.LayoutParams(0,dp(78),1));
-        root.addView(features);
-
-        LinearLayout footer=new LinearLayout(this);footer.setOrientation(LinearLayout.HORIZONTAL);footer.setGravity(Gravity.CENTER_VERTICAL);
-        footer.setBackground(box(Color.argb(120,8,15,34),10,Color.rgb(42,65,110),1));
-        footer.addView(label("▣  Expiration: "+expiration(),14,MUTED,false),new LinearLayout.LayoutParams(0,dp(48),1));
-        TextView logged=label("●  Logged in: "+(activeProfile.isEmpty()?"No user":activeProfile),14,activeProfile.isEmpty()?MUTED:RED,true);
-        logged.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);footer.addView(logged,new LinearLayout.LayoutParams(0,dp(48),1));
-        root.addView(footer);
-        setContentView(root);
+    @Override protected void onDestroy() {
+        if (player != null) player.release();
+        super.onDestroy();
     }
 
-    private void addGap(LinearLayout row,int n){Space s=new Space(this);row.addView(s,new LinearLayout.LayoutParams(dp(n),1));}
-    private LinearLayout homeCard(String icon,String title,String sub,int[] colors,View.OnClickListener click){LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.VERTICAL);c.setGravity(Gravity.CENTER);c.setPadding(dp(16),dp(18),dp(16),dp(18));GradientDrawable normal=new GradientDrawable(GradientDrawable.Orientation.TL_BR,colors);normal.setCornerRadius(dp(16));normal.setStroke(dp(1),Color.rgb(86,105,150));c.setBackground(normal);c.setFocusable(true);c.setClickable(true);c.setOnClickListener(click);TextView i=label(icon,46,TEXT,true);i.setGravity(Gravity.CENTER);c.addView(i,new LinearLayout.LayoutParams(-1,0,1));TextView t=label(title,21,TEXT,true);t.setGravity(Gravity.CENTER);c.addView(t);TextView st=label(sub,13,Color.rgb(222,229,245),false);st.setGravity(Gravity.CENTER);c.addView(st);if(title.equals("EMURPH RADIO")){TextView wave=label("▂▅▇▃▆▂▇▅▂",16,RED,true);wave.setGravity(Gravity.CENTER);c.addView(wave);}c.setOnFocusChangeListener((v,f)->{GradientDrawable g=new GradientDrawable(GradientDrawable.Orientation.TL_BR,colors);g.setCornerRadius(dp(16));g.setStroke(dp(f?3:1),f?RED:Color.rgb(86,105,150));v.setBackground(g);v.animate().scaleX(f?1.045f:1f).scaleY(f?1.045f:1f).setDuration(110).start();});return c;}
-    private LinearLayout feature(String icon,String title,String sub,View.OnClickListener click){LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.HORIZONTAL);c.setGravity(Gravity.CENTER_VERTICAL);c.setPadding(dp(18),dp(8),dp(18),dp(8));c.setBackground(box(PANEL,12,Color.rgb(68,83,120),1));c.setFocusable(true);c.setClickable(true);c.setOnClickListener(click);TextView i=label(icon,29,TEXT,true);c.addView(i,new LinearLayout.LayoutParams(dp(58),-1));LinearLayout words=new LinearLayout(this);words.setOrientation(LinearLayout.VERTICAL);words.addView(label(title,17,TEXT,true));words.addView(label(sub,12,MUTED,false));c.addView(words,new LinearLayout.LayoutParams(0,-1,1));c.setOnFocusChangeListener((v,f)->{v.setBackground(box(PANEL,12,f?BLUE:Color.rgb(68,83,120),f?3:1));v.animate().scaleX(f?1.025f:1f).scaleY(f?1.025f:1f).setDuration(100).start();});return c;}
+    private void showHome() {
+        releasePlayer();
+        web = new WebView(this);
+        web.setBackgroundColor(Color.rgb(2, 5, 16));
+        web.getSettings().setJavaScriptEnabled(true);
+        web.getSettings().setDomStorageEnabled(true);
+        web.addJavascriptInterface(new Bridge(), "EMurph");
+        web.setWebChromeClient(new WebChromeClient());
+        web.setWebViewClient(new WebViewClient());
+        web.setFocusable(true);
+        web.setFocusableInTouchMode(true);
+        web.loadDataWithBaseURL(null, homeHtml(), "text/html", "UTF-8", null);
+        setContentView(web);
+        web.requestFocus();
+    }
 
-    private LinearLayout screen(String title){release();LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(34),dp(22),dp(34),dp(22));root.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{Color.rgb(2,6,18),Color.rgb(7,12,30),Color.rgb(20,5,27)}));LinearLayout top=new LinearLayout(this);top.setOrientation(LinearLayout.HORIZONTAL);top.setGravity(Gravity.CENTER_VERTICAL);TextView logo=label("EMURPH ",30,TEXT,true);top.addView(logo);TextView tv=label("TV",30,RED,true);top.addView(tv);TextView heading=label(title,24,TEXT,true);heading.setGravity(Gravity.CENTER);top.addView(heading,new LinearLayout.LayoutParams(0,dp(64),1));root.addView(top,new LinearLayout.LayoutParams(-1,dp(70)));setContentView(root);return root;}
+    private String esc(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+    }
 
-    private void showUsers(){LinearLayout root=screen("LIST USERS");LinearLayout bar=new LinearLayout(this);bar.setOrientation(LinearLayout.HORIZONTAL);bar.setGravity(Gravity.CENTER_VERTICAL);bar.addView(label("Select a user profile to continue",15,MUTED,false),new LinearLayout.LayoutParams(0,dp(58),1));TextView add=action("+  ADD USER",v->showAddUser());add.setBackground(gradient(new int[]{BLUE,RED},12));bar.addView(add,new LinearLayout.LayoutParams(dp(190),dp(54)));root.addView(bar);LinearLayout cards=new LinearLayout(this);cards.setOrientation(LinearLayout.HORIZONTAL);cards.setGravity(Gravity.TOP);try{JSONArray users=new JSONArray(prefs.getString("profiles","[]"));if(users.length()==0){TextView none=label("No users saved yet. Select ADD USER to connect your service.",20,MUTED,false);none.setGravity(Gravity.CENTER);root.addView(none,new LinearLayout.LayoutParams(-1,0,1));return;}for(int i=0;i<users.length();i++){JSONObject p=users.getJSONObject(i);String name=p.optString("name");LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.VERTICAL);c.setPadding(dp(24),dp(22),dp(24),dp(22));c.setBackground(box(PANEL,16,name.equals(activeProfile)?RED:Color.rgb(56,66,95),name.equals(activeProfile)?2:1));TextView avatar=label("●  "+name,24,TEXT,true);avatar.setTextColor(name.equals(activeProfile)?Color.rgb(123,101,255):TEXT);c.addView(avatar);c.addView(label("Username: "+p.optString("username"),14,MUTED,false));c.addView(label("Server: EMurph TV Main",14,MUTED,false));TextView sel=action(name.equals(activeProfile)?"SELECTED":"SELECT",v->{activeProfile=name;prefs.edit().putString("active_profile",name).apply();showHome();});c.addView(sel,new LinearLayout.LayoutParams(-1,dp(52)));LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(0,dp(235),1);cp.setMargins(dp(8),dp(14),dp(8),0);cards.addView(c,cp);}}catch(Exception ignored){}root.addView(cards,new LinearLayout.LayoutParams(-1,0,1));}
+    private String homeHtml() {
+        String user = activeProfile.isEmpty() ? "No user" : esc(activeProfile);
+        String expiration = esc(expiration());
+        return "<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'>" +
+        "<style>" +
+        "*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020510;color:#fff;font-family:Arial,Helvetica,sans-serif}" +
+        "body:before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 15% 70%,rgba(0,93,255,.16),transparent 32%),radial-gradient(circle at 86% 72%,rgba(255,35,82,.13),transparent 30%),linear-gradient(180deg,#030817 0%,#020510 75%);z-index:-3}" +
+        ".studio{position:fixed;right:-50px;bottom:-25px;width:260px;height:520px;opacity:.17;filter:drop-shadow(0 0 30px #ff244e);z-index:-2}.studio:before{content:'';position:absolute;right:75px;top:0;width:70px;height:210px;border:8px solid #ff315d;border-radius:42px}.studio:after{content:'';position:absolute;right:20px;top:175px;width:180px;height:250px;border-right:9px solid #467dff;border-bottom:9px solid #467dff;border-radius:0 0 90px 0}" +
+        ".wrap{height:100%;padding:26px 34px 22px;display:grid;grid-template-rows:72px 1fr 92px 46px;gap:16px}" +
+        ".top{display:grid;grid-template-columns:300px 1fr 54px 54px 54px 54px;gap:12px;align-items:center}.logo{font-family:cursive;font-style:italic;font-weight:900;font-size:39px;letter-spacing:-2px;text-shadow:0 0 18px rgba(70,125,255,.35)}.logo b{color:#ff315d;font-size:44px}.search,.icon{height:52px;border:1px solid #33405d;background:linear-gradient(180deg,#0d1529,#080f21);border-radius:12px;color:#dce6ff;display:flex;align-items:center;justify-content:center;font-size:17px}.search{justify-content:flex-start;padding-left:22px}.icon{font-size:22px}" +
+        ".cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;min-height:0}.card{position:relative;border:1px solid #31405f;border-radius:14px;overflow:hidden;padding:20px 18px;display:flex;flex-direction:column;justify-content:flex-end;background:#101a35;box-shadow:inset 0 0 35px rgba(255,255,255,.025)}" +
+        ".card:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(2,5,16,.35));z-index:0}.card>*{position:relative}.live{background:linear-gradient(160deg,#075bd8 0%,#082758 67%,#071329)}.movies{background:linear-gradient(160deg,#d32f3d 0%,#621724 66%,#140812)}.series{background:linear-gradient(160deg,#7738d8 0%,#381772 66%,#10091d)}.radio{background:radial-gradient(circle at 50% 37%,rgba(0,117,255,.5),transparent 23%),linear-gradient(160deg,#101b3a,#080b1a);border-color:#ff315d;box-shadow:0 0 18px rgba(255,49,93,.18),inset 0 0 30px rgba(52,111,255,.12)}" +
+        ".art{flex:1;display:flex;align-items:center;justify-content:center;font-size:76px;text-shadow:0 0 20px rgba(255,255,255,.28)}.radio .art{font-size:68px}.featured{position:absolute;left:15px;top:14px;background:#ef234a;border-radius:4px;padding:4px 8px;font-size:11px;font-weight:bold}.card h2{margin:0 0 7px;font-size:24px}.card p{margin:0;color:#d6def0;font-size:14px}.wave{height:18px;margin:9px 0;background:repeating-linear-gradient(90deg,#2c78ff 0 3px,transparent 3px 7px,#ff315d 7px 10px,transparent 10px 14px);mask:linear-gradient(180deg,transparent 0,#000 35%,#000 65%,transparent 100%)}" +
+        ".features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.feature{border:1px solid #263653;border-radius:12px;background:linear-gradient(180deg,#0c1428,#070d1c);display:flex;align-items:center;padding:0 24px;gap:16px}.feature .fi{font-size:34px}.feature b{display:block;font-size:18px}.feature small{color:#aebbd2;font-size:13px}" +
+        ".footer{border:1px solid #1d2b48;border-radius:10px;background:#080e1d;display:flex;align-items:center;justify-content:space-between;padding:0 18px;color:#b8c3d8;font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,.25)}.footer strong{color:#ff4569}" +
+        "[tabindex]{outline:none;transition:.12s transform,.12s box-shadow,.12s border-color}[tabindex]:focus{transform:scale(1.035);border-color:#eaf2ff!important;box-shadow:0 0 0 3px #1b71ff,0 0 22px #ff315d!important;z-index:10}" +
+        "</style></head><body><div class='studio'></div><div class='wrap'>" +
+        "<div class='top'><div class='logo'>EMurph <b>TV</b></div><div class='search' tabindex='1' onclick='EMurph.masterSearch()'>⌕ &nbsp; Master Search</div><div class='icon' tabindex='2' onclick='EMurph.message(\"No new notifications\")'>🔔</div><div class='icon' tabindex='3' onclick='EMurph.users()'>👤</div><div class='icon' tabindex='4' onclick='EMurph.message(\"Recording controls are being finalized\")'>REC</div><div class='icon' tabindex='5' onclick='EMurph.settings()'>⚙</div></div>" +
+        "<div class='cards'><div class='card live' tabindex='6' onclick='EMurph.browse(\"live\")'><div class='art'>▣</div><h2>LIVE TV</h2><p>Watch Live Channels</p></div>" +
+        "<div class='card movies' tabindex='7' onclick='EMurph.browse(\"movie\")'><div class='art'>◉</div><h2>MOVIES</h2><p>Thousands of Movies</p></div>" +
+        "<div class='card series' tabindex='8' onclick='EMurph.browse(\"series\")'><div class='art'>▰</div><h2>SERIES</h2><p>Binge Worthy Shows</p></div>" +
+        "<div class='card radio' tabindex='9' onclick='EMurph.radio()'><span class='featured'>FEATURED</span><div class='art'>📻</div><h2>EMURPH <span style='color:#ff315d'>RADIO</span></h2><div class='wave'></div><p>Urban Contemporary Gospel</p></div></div>" +
+        "<div class='features'><div class='feature' tabindex='10' onclick='EMurph.browse(\"live\")'><span class='fi'>▤</span><div><b>LIVE WITH EPG</b><small>See what’s on now</small></div></div><div class='feature' tabindex='11' onclick='EMurph.message(\"Multi-screen is staged for the next build\")'><span class='fi'>▦</span><div><b>MULTI-SCREEN</b><small>Watch on multiple devices</small></div></div><div class='feature' tabindex='12' onclick='EMurph.browse(\"live\")'><span class='fi'>◴</span><div><b>CATCH UP</b><small>Never miss a moment</small></div></div></div>" +
+        "<div class='footer'><span>▣ &nbsp; Expiration: &nbsp;<strong>"+expiration+"</strong></span><span>👤 &nbsp; Logged in: &nbsp;<strong>"+user+"</strong></span></div></div>" +
+        "<script>document.addEventListener('keydown',e=>{const f=[...document.querySelectorAll('[tabindex]')];let i=f.indexOf(document.activeElement);if(i<0)i=0;if(e.key==='ArrowRight')i=Math.min(f.length-1,i+1);if(e.key==='ArrowLeft')i=Math.max(0,i-1);if(e.key==='ArrowDown')i=Math.min(f.length-1,i+(i<6?6:(i<10?4:3)));if(e.key==='ArrowUp')i=Math.max(0,i-(i<6?1:(i<10?6:4)));if(['ArrowRight','ArrowLeft','ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();f[i].focus()}});setTimeout(()=>document.querySelector('[tabindex]').focus(),250);</script></body></html>";
+    }
 
-    private void showAddUser(){LinearLayout root=screen("Enter Your Login Details");LinearLayout content=new LinearLayout(this);content.setOrientation(LinearLayout.HORIZONTAL);content.setGravity(Gravity.CENTER);LinearLayout art=new LinearLayout(this);art.setOrientation(LinearLayout.VERTICAL);art.setGravity(Gravity.CENTER);TextView mic=label("◉\nEMURPH RADIO",36,TEXT,true);mic.setGravity(Gravity.CENTER);mic.setTextColor(Color.rgb(152,110,255));art.addView(mic);art.addView(label("Urban Contemporary Gospel",17,MUTED,false));content.addView(art,new LinearLayout.LayoutParams(0,-1,.8f));LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(dp(20),dp(10),dp(20),dp(10));EditText n=input("Profile Name"),u=input("Username"),p=input("Password"),s=input("Server URL");p.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);for(EditText e:new EditText[]{n,u,p,s}){form.addView(e,new LinearLayout.LayoutParams(-1,dp(58)));Space sp=new Space(this);form.addView(sp,new LinearLayout.LayoutParams(1,dp(10)));}TextView add=action("ADD USER",v->addUser(n,u,p,s));add.setBackground(gradient(new int[]{BLUE,PURPLE,RED},12));form.addView(add,new LinearLayout.LayoutParams(-1,dp(60)));Space sp=new Space(this);form.addView(sp,new LinearLayout.LayoutParams(1,dp(12)));form.addView(action("LIST USERS",v->showUsers()),new LinearLayout.LayoutParams(-1,dp(54)));content.addView(form,new LinearLayout.LayoutParams(0,-1,1.25f));root.addView(content,new LinearLayout.LayoutParams(-1,0,1));}
+    public class Bridge {
+        @JavascriptInterface public void masterSearch() { runOnUiThread(() -> showSearch()); }
+        @JavascriptInterface public void users() { runOnUiThread(() -> showUsers()); }
+        @JavascriptInterface public void settings() { runOnUiThread(() -> showSettings()); }
+        @JavascriptInterface public void browse(String type) { runOnUiThread(() -> browseNative(type)); }
+        @JavascriptInterface public void radio() { runOnUiThread(() -> showRadio()); }
+        @JavascriptInterface public void message(String s) { runOnUiThread(() -> toast(s)); }
+    }
 
-    private void addUser(EditText n,EditText u,EditText p,EditText s){String name=n.getText().toString().trim(),user=u.getText().toString().trim(),pass=p.getText().toString(),server=s.getText().toString().trim();if(name.isEmpty()||user.isEmpty()||pass.isEmpty()||server.isEmpty()){toast("Complete all four fields.");return;}if(server.endsWith("/"))server=server.substring(0,server.length()-1);final String fs=server;toast("Checking login…");new Thread(()->{try{JSONObject response=getObject(fs+"/player_api.php?username="+enc(user)+"&password="+enc(pass));JSONObject info=response.optJSONObject("user_info");if(info==null)throw new Exception("No account data returned");JSONObject obj=new JSONObject();obj.put("name",name);obj.put("username",user);obj.put("password",pass);obj.put("server",fs);obj.put("exp",info.optString("exp_date",""));JSONArray arr=new JSONArray(prefs.getString("profiles","[]"));for(int i=arr.length()-1;i>=0;i--)if(arr.optJSONObject(i).optString("name").equals(name))arr.remove(i);arr.put(obj);prefs.edit().putString("profiles",arr.toString()).putString("active_profile",name).apply();activeProfile=name;runOnUiThread(this::showHome);}catch(Exception e){runOnUiThread(()->toast("Login failed: "+e.getMessage()));}}).start();}
+    private void showUsers() {
+        releasePlayer();
+        LinearLayout root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(dp(38),dp(25),dp(38),dp(25)); root.setBackgroundColor(Color.rgb(2,5,16));
+        LinearLayout top = new LinearLayout(this); top.setGravity(Gravity.CENTER_VERTICAL);
+        top.addView(label("EMurph TV",32,Color.WHITE,true), new LinearLayout.LayoutParams(0,dp(62),1));
+        top.addView(label("LIST USERS",22,Color.WHITE,true), new LinearLayout.LayoutParams(0,dp(62),1));
+        TextView add = button("＋ ADD USER", Color.rgb(18,76,180), v -> showAddUser()); top.addView(add,new LinearLayout.LayoutParams(dp(190),dp(54)));
+        root.addView(top);
+        LinearLayout cards = new LinearLayout(this); cards.setOrientation(LinearLayout.HORIZONTAL); cards.setPadding(0,dp(28),0,0); cards.setGravity(Gravity.TOP);
+        try {
+            JSONArray users = new JSONArray(prefs.getString("profiles","[]"));
+            if (users.length()==0) {
+                TextView empty=label("No users saved yet. Select ADD USER to connect your service.",20,Color.rgb(170,184,210),false); empty.setGravity(Gravity.CENTER); root.addView(empty,new LinearLayout.LayoutParams(-1,0,1)); setContentView(root); return;
+            }
+            for(int i=0;i<users.length();i++){
+                JSONObject p=users.getJSONObject(i); String name=p.optString("name"); boolean active=name.equals(activeProfile);
+                LinearLayout card=new LinearLayout(this); card.setOrientation(LinearLayout.VERTICAL); card.setPadding(dp(22),dp(20),dp(22),dp(20));
+                card.setBackground(panel(active?Color.rgb(26,92,210):Color.rgb(13,22,43),active?Color.rgb(255,49,93):Color.rgb(55,69,99),14,active?3:1)); card.setFocusable(true);
+                card.addView(label("◉  "+name,24,Color.WHITE,true)); card.addView(label("Username: "+p.optString("username"),15,Color.rgb(184,198,222),false)); card.addView(label("Server: EMurph TV Main",15,Color.rgb(184,198,222),false));
+                card.setOnClickListener(v->{activeProfile=name;prefs.edit().putString("active_profile",name).apply();showHome();}); focusGlow(card);
+                cards.addView(card,new LinearLayout.LayoutParams(0,dp(220),1)); if(i<users.length()-1) cards.addView(space(dp(18),1));
+            }
+        } catch(Exception ignored) {}
+        root.addView(cards,new LinearLayout.LayoutParams(-1,0,1)); setContentView(root);
+    }
 
-    private void showSearch(){EditText e=input("Search channels, movies, or series");new AlertDialog.Builder(this).setTitle("Master Search").setView(e).setPositiveButton("Search",(d,w)->performSearch(e.getText().toString().trim())).setNegativeButton("Cancel",null).show();}
-    private void performSearch(String q){if(q.isEmpty()){toast("Enter a search term");return;}if(!hasActiveUser()){toast("Add or select a user first.");showUsers();return;}new Thread(()->{JSONArray out=new JSONArray();try{JSONObject p=profile(activeProfile);for(String a:new String[]{"get_live_streams","get_vod_streams","get_series"}){JSONArray x=getArray(api(p)+"&action="+a);for(int i=0;i<x.length();i++){JSONObject o=x.optJSONObject(i);String n=o.optString("name",o.optString("title"));if(n.toLowerCase(Locale.US).contains(q.toLowerCase(Locale.US)))out.put(o);}}}catch(Exception ignored){}runOnUiThread(()->showResults("Search: "+q,out));}).start();}
+    private void showAddUser(){
+        releasePlayer();
+        LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.HORIZONTAL);root.setPadding(dp(48),dp(34),dp(48),dp(34));root.setBackgroundColor(Color.rgb(2,5,16));
+        LinearLayout art=new LinearLayout(this);art.setOrientation(LinearLayout.VERTICAL);art.setGravity(Gravity.CENTER);art.addView(label("🎙",84,Color.rgb(76,126,255),false));art.addView(label("EMurph RADIO",30,Color.WHITE,true));art.addView(label("STREAM • LISTEN • INSPIRE",14,Color.rgb(255,77,111),true));root.addView(art,new LinearLayout.LayoutParams(0,-1,.9f));
+        LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(dp(25),dp(10),dp(25),dp(10));form.setBackground(panel(Color.rgb(8,14,29),Color.rgb(43,61,96),16,1));
+        TextView title=label("Enter Your Login Details",28,Color.WHITE,true);title.setGravity(Gravity.CENTER);form.addView(title,new LinearLayout.LayoutParams(-1,dp(66)));
+        EditText n=input("Profile Name"),u=input("Username"),p=input("Password"),s=input("Server URL");p.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        for(EditText e:new EditText[]{n,u,p,s}){form.addView(e,new LinearLayout.LayoutParams(-1,dp(58)));form.addView(space(1,dp(11)));}
+        form.addView(button("ADD USER",Color.rgb(210,31,69),v->addUser(n,u,p,s)),new LinearLayout.LayoutParams(-1,dp(58)));form.addView(space(1,dp(12)));form.addView(button("LIST USERS",Color.rgb(16,31,63),v->showUsers()),new LinearLayout.LayoutParams(-1,dp(52)));
+        root.addView(form,new LinearLayout.LayoutParams(0,-1,1.15f));setContentView(root);
+    }
 
-    private void browse(String type){if(!hasActiveUser()){toast("Add or select an IPTV user first.");showUsers();return;}LinearLayout root=screen(type.toUpperCase(Locale.US));ProgressBar pb=new ProgressBar(this);root.addView(pb,new LinearLayout.LayoutParams(-1,0,1));new Thread(()->{JSONArray arr=new JSONArray();try{JSONObject p=profile(activeProfile);String action=type.equals("live")?"get_live_streams":type.equals("movie")?"get_vod_streams":"get_series";arr=getArray(api(p)+"&action="+action);}catch(Exception ignored){}JSONArray result=arr;runOnUiThread(()->showResults(type.toUpperCase(Locale.US),result));}).start();}
-    private void showResults(String title,JSONArray arr){LinearLayout root=screen(title);ScrollView scroll=new ScrollView(this);LinearLayout list=new LinearLayout(this);list.setOrientation(LinearLayout.VERTICAL);if(arr.length()==0){TextView n=label("No items returned.",18,MUTED,false);n.setGravity(Gravity.CENTER);list.addView(n,new LinearLayout.LayoutParams(-1,dp(180)));}for(int i=0;i<Math.min(arr.length(),250);i++){JSONObject o=arr.optJSONObject(i);if(o==null)continue;String name=o.optString("name",o.optString("title","Untitled"));list.addView(action(name,v->playItem(o)),new LinearLayout.LayoutParams(-1,dp(56)));Space s=new Space(this);list.addView(s,new LinearLayout.LayoutParams(1,dp(7)));}scroll.addView(list);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));}
+    private void showSearch(){ EditText e=input("Search channels, movies, or series"); new AlertDialog.Builder(this).setTitle("Master Search").setView(e).setPositiveButton("Search",(d,w)->performSearch(e.getText().toString().trim())).setNegativeButton("Cancel",null).show(); }
+    private void performSearch(String q){ if(q.isEmpty()){toast("Enter a search term");return;} if(!hasActiveUser()){toast("Add or select a user first.");return;} new Thread(()->{JSONArray out=new JSONArray();try{JSONObject p=profile(activeProfile);for(String a:new String[]{"get_live_streams","get_vod_streams","get_series"}){JSONArray x=getArray(api(p)+"&action="+a);for(int i=0;i<x.length();i++){JSONObject o=x.optJSONObject(i);String n=o.optString("name",o.optString("title"));if(n.toLowerCase(Locale.US).contains(q.toLowerCase(Locale.US)))out.put(o);}}}catch(Exception ignored){}runOnUiThread(()->showResults("Search: "+q,out));}).start(); }
+
+    private void browseNative(String type){ if(!hasActiveUser()){toast("Add or select an IPTV user first.");showUsers();return;} LinearLayout root=new LinearLayout(this);root.setGravity(Gravity.CENTER);root.setBackgroundColor(Color.rgb(2,5,16));ProgressBar pb=new ProgressBar(this);root.addView(pb);setContentView(root);new Thread(()->{JSONArray arr=new JSONArray();try{JSONObject p=profile(activeProfile);String action=type.equals("live")?"get_live_streams":type.equals("movie")?"get_vod_streams":"get_series";arr=getArray(api(p)+"&action="+action);}catch(Exception ignored){}JSONArray result=arr;runOnUiThread(()->showResults(type.toUpperCase(Locale.US),result));}).start(); }
+    private void showResults(String title,JSONArray arr){ LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(30),dp(20),dp(30),dp(20));root.setBackgroundColor(Color.rgb(2,5,16));LinearLayout top=new LinearLayout(this);top.setGravity(Gravity.CENTER_VERTICAL);top.addView(button("← HOME",Color.rgb(16,31,63),v->showHome()),new LinearLayout.LayoutParams(dp(150),dp(52)));top.addView(label(title,27,Color.WHITE,true),new LinearLayout.LayoutParams(0,dp(58),1));root.addView(top);ScrollView scroll=new ScrollView(this);LinearLayout list=new LinearLayout(this);list.setOrientation(LinearLayout.VERTICAL);if(arr.length()==0){TextView n=label("No items returned.",18,Color.LTGRAY,false);n.setGravity(Gravity.CENTER);list.addView(n,new LinearLayout.LayoutParams(-1,dp(180)));}for(int i=0;i<Math.min(arr.length(),250);i++){JSONObject o=arr.optJSONObject(i);if(o==null)continue;String name=o.optString("name",o.optString("title","Untitled"));list.addView(button(name,Color.rgb(10,20,42),v->playItem(o)),new LinearLayout.LayoutParams(-1,dp(58)));list.addView(space(1,dp(7)));}scroll.addView(list);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));setContentView(root); }
     private void playItem(JSONObject o){try{JSONObject p=profile(activeProfile);if(o.has("series_id")){toast("Episode browsing is coming in the next build.");return;}String id=o.optString("stream_id"),ext=o.optString("container_extension","m3u8");boolean movie="movie".equals(o.optString("stream_type"))||o.has("rating_5based");String url=p.optString("server")+"/"+(movie?"movie":"live")+"/"+enc(p.optString("username"))+"/"+enc(p.optString("password"))+"/"+id+"."+ext;showPlayer(o.optString("name","Playing"),url);}catch(Exception e){toast("Unable to build stream URL.");}}
-    private void showPlayer(String title,String url){LinearLayout root=screen(title);PlayerView view=new PlayerView(this);player=new ExoPlayer.Builder(this).build();view.setPlayer(player);player.setMediaItem(MediaItem.fromUri(Uri.parse(url)));player.prepare();player.play();root.addView(view,new LinearLayout.LayoutParams(-1,0,1));}
-    private void showRadio(){LinearLayout root=screen("EMURPH RADIO");LinearLayout body=new LinearLayout(this);body.setOrientation(LinearLayout.HORIZONTAL);body.setGravity(Gravity.CENTER);LinearLayout info=new LinearLayout(this);info.setOrientation(LinearLayout.VERTICAL);info.setGravity(Gravity.CENTER);TextView logo=label("◉\nEMURPH RADIO",38,TEXT,true);logo.setGravity(Gravity.CENTER);logo.setTextColor(Color.rgb(180,110,255));info.addView(logo);info.addView(label("Urban Contemporary Gospel",18,MUTED,false));TextView status=label("Ready",16,MUTED,false);status.setGravity(Gravity.CENTER);info.addView(status);body.addView(info,new LinearLayout.LayoutParams(0,-1,.8f));LinearLayout right=new LinearLayout(this);right.setOrientation(LinearLayout.VERTICAL);PlayerView pv=new PlayerView(this);right.addView(pv,new LinearLayout.LayoutParams(-1,0,1));TextView play=action("▶  PLAY EMURPH RADIO",v->{release();player=new ExoPlayer.Builder(this).build();pv.setPlayer(player);player.setMediaItem(MediaItem.fromUri(Uri.parse(prefs.getString("radio_url",defaultRadioUrl))));player.prepare();player.play();status.setText("Now Playing");});play.setBackground(gradient(new int[]{BLUE,PURPLE,RED},12));right.addView(play,new LinearLayout.LayoutParams(-1,dp(62)));body.addView(right,new LinearLayout.LayoutParams(0,-1,1.3f));root.addView(body,new LinearLayout.LayoutParams(-1,0,1));}
-    private void showSettings(){LinearLayout root=screen("SETTINGS");LinearLayout box=new LinearLayout(this);box.setOrientation(LinearLayout.VERTICAL);box.setPadding(dp(150),dp(20),dp(150),dp(20));box.addView(action("Switch User",v->showUsers()),new LinearLayout.LayoutParams(-1,dp(60)));Space a=new Space(this);box.addView(a,new LinearLayout.LayoutParams(1,dp(14)));box.addView(action("Update EMurph Radio URL",v->editRadioUrl()),new LinearLayout.LayoutParams(-1,dp(60)));Space b=new Space(this);box.addView(b,new LinearLayout.LayoutParams(1,dp(14)));box.addView(action("Clear Saved Users",v->{prefs.edit().clear().apply();activeProfile="";showHome();}),new LinearLayout.LayoutParams(-1,dp(60)));box.addView(label("EMurph TV Branded Preview 0.2\nAndroid TV and Amazon Fire TV",16,MUTED,false));root.addView(box,new LinearLayout.LayoutParams(-1,0,1));}
+    private void showPlayer(String title,String url){releasePlayer();LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setBackgroundColor(Color.BLACK);TextView back=button("← HOME  •  "+title,Color.rgb(10,20,42),v->showHome());root.addView(back,new LinearLayout.LayoutParams(-1,dp(52)));PlayerView view=new PlayerView(this);player=new ExoPlayer.Builder(this).build();view.setPlayer(player);player.setMediaItem(MediaItem.fromUri(Uri.parse(url)));player.prepare();player.play();root.addView(view,new LinearLayout.LayoutParams(-1,0,1));setContentView(root);}
+    private void showRadio(){releasePlayer();LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(34),dp(25),dp(34),dp(25));root.setGravity(Gravity.CENTER);root.setBackgroundColor(Color.rgb(2,5,16));root.addView(label("📻",88,Color.WHITE,false));root.addView(label("EMurph RADIO",38,Color.WHITE,true));root.addView(label("Urban Contemporary Gospel",19,Color.rgb(180,196,222),false));TextView status=label("Ready",16,Color.rgb(180,196,222),false);status.setGravity(Gravity.CENTER);root.addView(status);root.addView(space(1,dp(22)));root.addView(button("▶ PLAY RADIO",Color.rgb(210,31,69),v->{releasePlayer();player=new ExoPlayer.Builder(this).build();player.setMediaItem(MediaItem.fromUri(Uri.parse(prefs.getString("radio_url",defaultRadioUrl))));player.prepare();player.play();status.setText("Now Playing");}),new LinearLayout.LayoutParams(dp(440),dp(62)));root.addView(space(1,dp(14)));root.addView(button("← HOME",Color.rgb(16,31,63),v->showHome()),new LinearLayout.LayoutParams(dp(440),dp(54)));setContentView(root);}
+    private void showSettings(){String[] options={"Switch User","Update EMurph Radio URL","Clear Saved Users","Cancel"};new AlertDialog.Builder(this).setTitle("EMurph TV Settings").setItems(options,(d,w)->{if(w==0)showUsers();else if(w==1)editRadioUrl();else if(w==2){prefs.edit().clear().apply();activeProfile="";showHome();}}).show();}
     private void editRadioUrl(){EditText e=input("Radio URL");e.setText(prefs.getString("radio_url",defaultRadioUrl));new AlertDialog.Builder(this).setTitle("EMurph Radio URL").setView(e).setPositiveButton("Save",(d,w)->prefs.edit().putString("radio_url",e.getText().toString().trim()).apply()).setNegativeButton("Cancel",null).show();}
 
+    private void addUser(EditText n,EditText u,EditText p,EditText s){String name=n.getText().toString().trim(),user=u.getText().toString().trim(),pass=p.getText().toString(),server=s.getText().toString().trim();if(name.isEmpty()||user.isEmpty()||pass.isEmpty()||server.isEmpty()){toast("Complete all four fields.");return;}if(server.endsWith("/"))server=server.substring(0,server.length()-1);String fs=server;toast("Checking login…");new Thread(()->{try{JSONObject response=getObject(fs+"/player_api.php?username="+enc(user)+"&password="+enc(pass));JSONObject info=response.optJSONObject("user_info");if(info==null)throw new Exception("No account data returned");JSONObject obj=new JSONObject();obj.put("name",name);obj.put("username",user);obj.put("password",pass);obj.put("server",fs);obj.put("exp",info.optString("exp_date",""));JSONArray arr=new JSONArray(prefs.getString("profiles","[]"));for(int i=arr.length()-1;i>=0;i--)if(arr.optJSONObject(i).optString("name").equals(name))arr.remove(i);arr.put(obj);prefs.edit().putString("profiles",arr.toString()).putString("active_profile",name).apply();activeProfile=name;runOnUiThread(this::showHome);}catch(Exception e){runOnUiThread(()->toast("Login failed: "+e.getMessage()));}}).start();}
+
+    private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setPadding(dp(14),dp(8),dp(14),dp(8));if(bold)t.setTypeface(android.graphics.Typeface.DEFAULT,android.graphics.Typeface.BOLD);return t;}
+    private TextView button(String text,int color,View.OnClickListener click){TextView b=label(text,18,Color.WHITE,true);b.setGravity(Gravity.CENTER);b.setFocusable(true);b.setClickable(true);b.setBackground(panel(color,Color.rgb(65,82,118),12,1));b.setOnClickListener(click);focusGlow(b);return b;}
+    private EditText input(String hint){EditText e=new EditText(this);e.setHint(hint);e.setHintTextColor(Color.rgb(140,155,184));e.setTextColor(Color.WHITE);e.setTextSize(18);e.setSingleLine(true);e.setPadding(dp(16),0,dp(16),0);e.setBackground(panel(Color.rgb(9,17,35),Color.rgb(58,76,112),10,1));return e;}
+    private android.graphics.drawable.GradientDrawable panel(int color,int stroke,int radius,int width){android.graphics.drawable.GradientDrawable g=new android.graphics.drawable.GradientDrawable();g.setColor(color);g.setCornerRadius(dp(radius));g.setStroke(dp(width),stroke);return g;}
+    private void focusGlow(View v){v.setOnFocusChangeListener((view,f)->{view.animate().scaleX(f?1.035f:1f).scaleY(f?1.035f:1f).setDuration(110).start();view.setAlpha(f?1f:.96f);});}
+    private Space space(int w,int h){Space s=new Space(this);s.setLayoutParams(new LinearLayout.LayoutParams(w,h));return s;}
+    private int dp(int n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
+    private void toast(String s){Toast.makeText(this,s,Toast.LENGTH_LONG).show();}
+    private void releasePlayer(){if(player!=null){player.release();player=null;}}
     private boolean hasActiveUser(){return !activeProfile.isEmpty();}
     private JSONObject profile(String name)throws Exception{JSONArray a=new JSONArray(prefs.getString("profiles","[]"));for(int i=0;i<a.length();i++){JSONObject p=a.getJSONObject(i);if(name.equals(p.optString("name")))return p;}throw new Exception("Profile not found");}
     private String api(JSONObject p)throws Exception{return p.getString("server")+"/player_api.php?username="+enc(p.getString("username"))+"&password="+enc(p.getString("password"));}
+    private String expiration(){if(activeProfile.isEmpty())return "Not connected";try{String x=profile(activeProfile).optString("exp","");if(x.isEmpty()||"null".equals(x))return "Unknown";long sec=Long.parseLong(x);return new SimpleDateFormat("MMMM d, yyyy",Locale.US).format(new Date(sec*1000));}catch(Exception e){return "Unknown";}}
     private String enc(String s)throws Exception{return URLEncoder.encode(s,"UTF-8");}
-    private JSONObject getObject(String url)throws Exception{return new JSONObject(get(url));}
-    private JSONArray getArray(String url)throws Exception{return new JSONArray(get(url));}
-    private String get(String u)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL(u).openConnection();c.setConnectTimeout(15000);c.setReadTimeout(30000);c.setRequestProperty("User-Agent","EMurphTV/0.2");InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] b=new byte[8192];int n;while((n=in.read(b))>0)out.write(b,0,n);return out.toString(StandardCharsets.UTF_8.name());}
-    private String expiration(){if(activeProfile.isEmpty())return "Not connected";try{String v=profile(activeProfile).optString("exp","");if(v.isEmpty()||"null".equals(v))return "Unknown";long epoch=Long.parseLong(v);return new SimpleDateFormat("MMMM d, yyyy",Locale.US).format(new Date(epoch*1000));}catch(Exception e){return "Unknown";}}
-    private void toast(String s){Toast.makeText(this,s,Toast.LENGTH_LONG).show();}
-    @Override public void onBackPressed(){showHome();}
+    private JSONObject getObject(String url)throws Exception{return new JSONObject(read(url));}
+    private JSONArray getArray(String url)throws Exception{return new JSONArray(read(url));}
+    private String read(String u)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL(u).openConnection();c.setConnectTimeout(12000);c.setReadTimeout(25000);c.setRequestProperty("User-Agent","EMurphTV/0.2");try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];for(int n;(n=in.read(b))>0;)out.write(b,0,n);return out.toString(StandardCharsets.UTF_8.name());}finally{c.disconnect();}}
 }
