@@ -175,23 +175,52 @@ public class MainActivity extends Activity {
         "linear-gradient(155deg,#0f1c40,#060918);" +
         "border-color:#ff315d;box-shadow:0 0 20px #176bff,0 0 24px rgba(255,49,93,.7),inset 0 0 38px rgba(40,100,255,.22)}" +
         // Card scene overlays (subtle imagery)
-        ".scene{position:absolute;left:0;right:0;bottom:54px;height:80px;opacity:.28;" +
-        "background:linear-gradient(180deg,transparent,rgba(0,0,0,.95))}" +
-        // TV screen silhouette for LIVE TV
-        ".live .scene:before{content:'';position:absolute;left:14%;right:14%;bottom:6px;height:28px;" +
-        "background:#071326;border-top:4px solid #3275ff;border-radius:3px}" +
-        // Cinema seats for MOVIES
-        ".movies .scene:before{content:'';position:absolute;left:6%;right:6%;bottom:4px;height:36px;" +
-        "border-radius:20px 20px 3px 3px;background:repeating-linear-gradient(90deg,#32101a 0 24px,#601424 24px 48px)}" +
-        // Couch silhouette for SERIES
-        ".series .scene:before{content:'';position:absolute;left:8%;right:8%;bottom:6px;height:35px;" +
-        "border-radius:18px 18px 4px 4px;background:#26114a}" +
+        ".scene{position:absolute;left:0;right:0;bottom:0;height:120px;opacity:1;pointer-events:none}" +
+        // LIVE TV: stage floor + audience rows silhouette
+        ".live .scene{background:" +
+        "linear-gradient(180deg,transparent 0%,rgba(2,15,40,.7) 55%,rgba(2,10,30,.95) 100%)}" +
+        ".live .scene:before{content:'';position:absolute;left:0;right:0;bottom:0;height:52px;" +
+        "background:" +
+        "radial-gradient(ellipse 80% 12px at 50% 100%,rgba(50,117,255,.18) 0%,transparent 100%)," +
+        "repeating-linear-gradient(0deg,transparent 0px,transparent 10px,rgba(30,70,160,.22) 10px,rgba(30,70,160,.22) 12px);" +
+        "border-top:2px solid rgba(50,117,255,.35)}" +
+        ".live .scene:after{content:'';position:absolute;left:20%;right:20%;bottom:52px;height:3px;" +
+        "background:rgba(50,117,255,.5);border-radius:2px}" +
+        // MOVIES: cinema seat rows
+        ".movies .scene{background:linear-gradient(180deg,transparent 0%,rgba(30,5,12,.75) 55%,rgba(20,4,10,.97) 100%)}" +
+        ".movies .scene:before{content:'';position:absolute;left:4%;right:4%;bottom:4px;height:48px;" +
+        "background:" +
+        "repeating-linear-gradient(90deg,#2a0a14 0 20px,#3d0f1c 20px 22px,#2a0a14 22px 42px,#3d0f1c 42px 44px);" +
+        "border-radius:14px 14px 3px 3px;" +
+        "box-shadow:inset 0 8px 12px rgba(0,0,0,.5)}" +
+        ".movies .scene:after{content:'';position:absolute;left:8%;right:8%;bottom:52px;height:3px;" +
+        "background:rgba(180,30,60,.3);border-radius:2px}" +
+        // SERIES: sofa/couch silhouette
+        ".series .scene{background:linear-gradient(180deg,transparent 0%,rgba(12,4,28,.75) 55%,rgba(8,3,20,.97) 100%)}" +
+        ".series .scene:before{content:'';position:absolute;left:6%;right:6%;bottom:4px;height:44px;" +
+        "background:#1a0b38;border-radius:22px 22px 4px 4px;" +
+        "box-shadow:inset 0 -4px 0 rgba(100,60,200,.3),inset 0 8px 16px rgba(0,0,0,.4)}" +
+        ".series .scene:after{content:'';position:absolute;left:10%;right:10%;bottom:44px;height:10px;" +
+        "background:#2a1258;border-radius:6px 6px 0 0}" +
+        // RADIO: equalizer bars silhouette
+        ".radio .scene{background:linear-gradient(180deg,transparent 0%,rgba(2,6,20,.75) 55%,rgba(1,4,14,.97) 100%)}" +
+        ".radio .scene:before{content:'';position:absolute;left:8%;right:8%;bottom:6px;height:42px;" +
+        "background:" +
+        "repeating-linear-gradient(90deg," +
+        "#1a3a8a 0 4px,transparent 4px 7px," +
+        "#8b1a3a 7px 11px,transparent 11px 14px," +
+        "#1a3a8a 14px 18px,transparent 18px 21px," +
+        "#8b1a3a 21px 25px,transparent 25px 28px," +
+        "#1a3a8a 28px 32px,transparent 32px 35px," +
+        "#8b1a3a 35px 39px,transparent 39px 42px" +
+        ");" +
+        "mask:linear-gradient(180deg,transparent 0%,#000 40%)}" +
         // Featured badge
         ".featured{position:absolute;left:12px;top:12px;background:#f02750;border-radius:4px;" +
         "padding:4px 9px;font-size:10px;font-weight:bold;letter-spacing:.5px}" +
         ".art{flex:1;display:flex;align-items:center;justify-content:center}" +
         ".art svg{width:100px;height:100px;filter:drop-shadow(0 0 10px rgba(255,255,255,.25))}" +
-        ".card h2{margin:0 0 4px;font-size:21px;font-family:'Arial Black',Arial,sans-serif;font-weight:900}" +
+        ".card h2{margin:0 0 4px;font-size:24px;font-family:'Arial Black',Arial,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:.5px}" +
         ".card p{margin:0;color:#ccd8f0;font-size:12px;font-weight:normal}" +
         ".wave{height:16px;margin:6px 0;" +
         "background:repeating-linear-gradient(90deg,#2c78ff 0 3px,transparent 3px 7px,#ff315d 7px 10px,transparent 10px 14px);" +
@@ -213,9 +242,9 @@ public class MainActivity extends Activity {
         "display:flex;align-items:center;justify-content:space-between;" +
         "padding:0 18px;color:#a8b8d2;font-size:13px;" +
         "box-shadow:0 0 16px rgba(25,90,255,.14)}" +
-        ".footer strong{color:#ff466c}" +
+        ".footer strong{color:#ff6a00}" +
         ".footer .sep{width:1px;height:24px;background:#1e3050}" +
-        // ── Lower brand section ───────────────────────────────────────────────
+        // ── Lower brand section ─────────────────────────────────────────────── ───────────────────────────────────────────────
         ".brandbar{display:flex;flex-direction:column;align-items:center;justify-content:center;" +
         "position:relative;overflow:hidden;border-radius:10px;" +
         "background:linear-gradient(90deg,#030c20,#060416,#030c20)}" +
@@ -281,20 +310,21 @@ public class MainActivity extends Activity {
         "</div>" +
         // ── Feature row ───────────────────────────────────────────────────────
         "<div class='features'>" +
-        "<div class='feature' tabindex='11' onclick='EMurph.browse(\"live\")'>" +
-        "<span class='fi'><svg width='30' height='30' viewBox='0 0 24 24' fill='none' stroke='#6ab0ff' stroke-width='2'>" +
-        "<path d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'/><path d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'/></svg></span>" +
-        "<div><b>LIVE WITH EPG</b><small>See what's on now</small></div></div>" +
+                "<div class='feature' tabindex='11' onclick='EMurph.browse(\"live\")'>"
+        + "<span class='fi'><svg width='30' height='30' viewBox='0 0 24 24' fill='none' stroke='#6ab0ff' stroke-width='2'>"
+        + "<rect x='2' y='3' width='20' height='14' rx='2'/><line x1='8' y1='21' x2='16' y2='21'/><line x1='12' y1='17' x2='12' y2='21'/></svg></span>"
+        + "<div><b>LIVE WITH EPG</b><small>See what's on now</small></div></div>" +
         "<div class='feature' tabindex='12' onclick='EMurph.message(\"Multi-screen is staged\")'>" +
         "<span class='fi'><svg width='30' height='30' viewBox='0 0 24 24' fill='none' stroke='#aa66ff' stroke-width='2'>" +
         "<rect x='3' y='3' width='8' height='8' rx='1'/><rect x='13' y='3' width='8' height='8' rx='1'/>" +
         "<rect x='3' y='13' width='8' height='8' rx='1'/><rect x='13' y='13' width='8' height='8' rx='1'/></svg></span>" +
         "<div><b>MULTI-SCREEN</b><small>Watch on multiple devices</small></div></div>" +
-        "<div class='feature' tabindex='13' onclick='EMurph.browse(\"live\")'>" +
-        "<span class='fi'><svg width='30' height='30' viewBox='0 0 24 24' fill='none' stroke='#ff6688' stroke-width='2'>" +
-        "<circle cx='12' cy='12' r='9'/><polyline points='12 7 12 12 15 15'/>" +
-        "<path d='M7.5 4.5L6 3M16.5 4.5L18 3'/></svg></span>" +
-        "<div><b>CATCH UP</b><small>Never miss a moment</small></div></div>" +
+                "<div class='feature' tabindex='13' onclick='EMurph.browse(\"live\")'>"
+        + "<span class='fi'><svg width='30' height='30' viewBox='0 0 24 24' fill='none' stroke='#ff6688' stroke-width='2'>"
+        + "<circle cx='12' cy='12' r='9'/><polyline points='12 7 12 12 15 15'/>"
+        + "<path d='M3.05 11a9 9 0 0 1 .9-3.5' stroke-linecap='round'/><path d='M3 3l18 18' stroke='none'/>"
+        + "<path d='M4 4.5 A9 9 0 0 0 3.05 11' stroke-linecap='round'/></svg></span>"
+        + "<div><b>CATCH UP</b><small>Never miss a moment</small></div></div>" +
         "</div>" +
         // ── Footer status bar ─────────────────────────────────────────────────
         "<div class='footer'>" +
@@ -368,47 +398,27 @@ public class MainActivity extends Activity {
                   "<line x1='92' y1='28' x2='86' y2='48'/>" +
                   "</g></svg>";
         } else {
-            // Radio with broadcast waves - elaborate design matching reference
-            svg = "<svg viewBox='0 0 120 120'><defs>" +
-                  "<linearGradient id='rg' x1='0%' y1='0%' x2='100%' y2='0%'>" +
-                  "<stop offset='0%' stop-color='#2478ff'/><stop offset='100%' stop-color='#ff315d'/></linearGradient>" +
-                  "<linearGradient id='rg2' x1='0%' y1='0%' x2='0%' y2='100%'>" +
-                  "<stop offset='0%' stop-color='#4499ff'/><stop offset='100%' stop-color='#1a3080'/></linearGradient>" +
-                  "<filter id='glow'><feGaussianBlur stdDeviation='2' result='blur'/><feMerge><feMergeNode in='blur'/><feMergeNode in='SourceGraphic'/></feMerge></filter>" +
-                  "</defs>" +
-                  // Broadcast arcs left
-                  "<g fill='none' stroke-linecap='round' filter='url(#glow)'>" +
-                  "<path d='M28 60 a22 22 0 0 1 0-20' stroke='#2478ff' stroke-width='4' opacity='.7'/>" +
-                  "<path d='M20 64 a32 32 0 0 1 0-28' stroke='#2478ff' stroke-width='3.5' opacity='.5'/>" +
-                  "<path d='M12 68 a42 42 0 0 1 0-36' stroke='#2478ff' stroke-width='3' opacity='.3'/>" +
-                  // Broadcast arcs right
-                  "<path d='M92 60 a22 22 0 0 0 0-20' stroke='#ff315d' stroke-width='4' opacity='.7'/>" +
-                  "<path d='M100 64 a32 32 0 0 0 0-28' stroke='#ff315d' stroke-width='3.5' opacity='.5'/>" +
-                  "<path d='M108 68 a42 42 0 0 0 0-36' stroke='#ff315d' stroke-width='3' opacity='.3'/>" +
+            // Radio icon - clean simple design matching reference: radio body + WiFi arcs blue/red
+            svg = "<svg viewBox='0 0 120 120'>" +
+                  // Left broadcast arcs (blue)
+                  "<g fill='none' stroke-linecap='round'>" +
+                  "<path d='M38 50 a18 18 0 0 0 0 20' stroke='#3a8fff' stroke-width='4.5'/>" +
+                  "<path d='M28 42 a30 30 0 0 0 0 36' stroke='#3a8fff' stroke-width='4' opacity='.6'/>" +
+                  // Right broadcast arcs (red)
+                  "<path d='M82 50 a18 18 0 0 1 0 20' stroke='#ff315d' stroke-width='4.5'/>" +
+                  "<path d='M92 42 a30 30 0 0 1 0 36' stroke='#ff315d' stroke-width='4' opacity='.6'/>" +
                   "</g>" +
-                  // Radio body
-                  "<rect x='28' y='52' width='64' height='42' rx='8' fill='url(#rg2)' stroke='url(#rg)' stroke-width='2.5'/>" +
-                  // Speaker grille
-                  "<rect x='34' y='58' width='28' height='28' rx='4' fill='none' stroke='#4488ff' stroke-width='1.5' opacity='.6'/>" +
-                  "<circle cx='48' cy='72' r='10' fill='none' stroke='url(#rg)' stroke-width='2'/>" +
-                  "<circle cx='48' cy='72' r='4' fill='url(#rg)'/>" +
-                  // Tuner dial
-                  "<circle cx='76' cy='68' r='9' fill='none' stroke='#ff315d' stroke-width='2'/>" +
-                  "<circle cx='76' cy='68' r='3' fill='#ff315d'/>" +
+                  // Radio body (rounded rectangle)
+                  "<rect x='40' y='46' width='40' height='28' rx='5' fill='none' stroke='#3a8fff' stroke-width='4'/>" +
+                  // Speaker circle
+                  "<circle cx='55' cy='60' r='8' fill='none' stroke='#3a8fff' stroke-width='3.5'/>" +
+                  "<circle cx='55' cy='60' r='2.5' fill='#3a8fff'/>" +
+                  // Tuner knob
+                  "<circle cx='72' cy='57' r='5' fill='none' stroke='#ff315d' stroke-width='3'/>" +
+                  "<circle cx='72' cy='57' r='2' fill='#ff315d'/>" +
                   // Antenna
-                  "<line x1='72' y1='52' x2='62' y2='24' stroke='white' stroke-width='3' stroke-linecap='round'/>" +
-                  "<circle cx='62' cy='24' r='3' fill='white'/>" +
-                  // Equalizer bars at bottom
-                  "<g fill='url(#rg)' opacity='.9'>" +
-                  "<rect x='34' y='88' width='4' height='6' rx='1'/>" +
-                  "<rect x='40' y='84' width='4' height='10' rx='1'/>" +
-                  "<rect x='46' y='80' width='4' height='14' rx='1'/>" +
-                  "<rect x='52' y='83' width='4' height='11' rx='1'/>" +
-                  "<rect x='58' y='86' width='4' height='8' rx='1'/>" +
-                  "<rect x='64' y='82' width='4' height='12' rx='1'/>" +
-                  "<rect x='70' y='85' width='4' height='9' rx='1'/>" +
-                  "<rect x='76' y='88' width='4' height='6' rx='1'/>" +
-                  "</g>" +
+                  "<line x1='68' y1='46' x2='60' y2='28' stroke='white' stroke-width='3.5' stroke-linecap='round'/>" +
+                  "<circle cx='60' cy='28' r='3' fill='white'/>" +
                   "</svg>";
         }
         return "<div class='card " + cls + "' tabindex='" + tab + "' onclick='" + click + "'>" +
