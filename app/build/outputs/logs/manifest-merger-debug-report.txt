@@ -1,0 +1,170 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:1:1-26:12
+INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:1:1-26:12
+INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:1:1-26:12
+INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:1:1-26:12
+MERGED from [androidx.media3:media3-ui:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c41f0e7ad94e7c820092548859f09737/transformed/media3-ui-1.4.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-extractor:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/5dd094e41ff1915d822e5a0b8c56bb71/transformed/media3-extractor-1.4.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-container:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c2ec50aba2c2e96fd3bacda0c8567c86/transformed/media3-container-1.4.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-datasource:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/6b9951b25c9270ec5fb1ac25d57d0f50/transformed/media3-datasource-1.4.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-decoder:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c85b77a22747ca980daa8c9b30a60981/transformed/media3-decoder-1.4.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-database:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c751088656c69b635ff8d6d562959830/transformed/media3-database-1.4.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-common:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/7eb088ae1ccba102a479dc69ecd8ef64/transformed/media3-common-1.4.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.media3:media3-exoplayer:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/3607f82bc781e017a7968f9db478da71/transformed/media3-exoplayer-1.4.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.media:media:1.7.0] /home/ubuntu/.gradle/caches/transforms-4/f4dbd72abeeb63cc2af322b0e204c3dd/transformed/media-1.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.recyclerview:recyclerview:1.3.0] /home/ubuntu/.gradle/caches/transforms-4/3b281bcc8b8d936aaabac750985c6bc2/transformed/recyclerview-1.3.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview:1.0.0] /home/ubuntu/.gradle/caches/transforms-4/1a52f6c07cba32f7511408fc5dfbe681/transformed/customview-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /home/ubuntu/.gradle/caches/transforms-4/c79f7ae19e07afaabcd99a24f26f526b/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:17:1-23:12
+MERGED from [androidx.core:core-ktx:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/b14a5ac4c688f983aa9ad97be20c908b/transformed/core-ktx-1.9.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/ubuntu/.gradle/caches/transforms-4/8283203b80fa64dcee6eceaa080698e2/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] /home/ubuntu/.gradle/caches/transforms-4/903707b27cb0ff5c6fd4007dddfaee65/transformed/exifinterface-1.3.6/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.3.1] /home/ubuntu/.gradle/caches/transforms-4/45a9c2c9a964593e07377c5572435907/transformed/lifecycle-runtime-2.3.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.arch.core:core-runtime:2.1.0] /home/ubuntu/.gradle/caches/transforms-4/ebaa3bb6eb2a505380f2287fc2631e28/transformed/core-runtime-2.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.annotation:annotation-experimental:1.3.1] /home/ubuntu/.gradle/caches/transforms-4/8a32381aff4d6885b198d70d3379c5df/transformed/annotation-experimental-1.3.1/AndroidManifest.xml:17:1-22:12
+	package
+		INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:1:11-69
+uses-permission#android.permission.INTERNET
+ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:2:5-67
+	android:name
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:2:22-64
+uses-feature#android.software.leanback
+ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:3:5-87
+	android:required
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:3:60-84
+	android:name
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:3:19-59
+uses-feature#android.hardware.touchscreen
+ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:4:5-90
+	android:required
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:4:63-87
+	android:name
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:4:19-62
+application
+ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:6:5-25:19
+INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:6:5-25:19
+MERGED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:28:5-89
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/ubuntu/.gradle/caches/transforms-4/8283203b80fa64dcee6eceaa080698e2/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/ubuntu/.gradle/caches/transforms-4/8283203b80fa64dcee6eceaa080698e2/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+	android:extractNativeLibs
+		INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
+	android:label
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:10:9-34
+	android:icon
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:9:9-42
+	android:allowBackup
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:7:9-35
+	android:banner
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:8:9-45
+	android:theme
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:12:9-40
+	android:networkSecurityConfig
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:11:9-69
+	android:usesCleartextTraffic
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:13:9-44
+activity#app.emurph.tv.MainActivity
+ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:14:9-24:20
+	android:screenOrientation
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:18:13-50
+	android:exported
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:17:13-36
+	android:configChanges
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:16:13-83
+	android:name
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:15:13-41
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER+category:name:android.intent.category.LEANBACK_LAUNCHER
+ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:19:13-23:29
+action#android.intent.action.MAIN
+ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:20:17-69
+	android:name
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:20:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:21:17-77
+	android:name
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:21:27-74
+category#android.intent.category.LEANBACK_LAUNCHER
+ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:22:17-86
+	android:name
+		ADDED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml:22:27-83
+uses-sdk
+INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml
+INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml
+MERGED from [androidx.media3:media3-ui:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c41f0e7ad94e7c820092548859f09737/transformed/media3-ui-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-ui:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c41f0e7ad94e7c820092548859f09737/transformed/media3-ui-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-extractor:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/5dd094e41ff1915d822e5a0b8c56bb71/transformed/media3-extractor-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-extractor:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/5dd094e41ff1915d822e5a0b8c56bb71/transformed/media3-extractor-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-container:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c2ec50aba2c2e96fd3bacda0c8567c86/transformed/media3-container-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-container:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c2ec50aba2c2e96fd3bacda0c8567c86/transformed/media3-container-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-datasource:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/6b9951b25c9270ec5fb1ac25d57d0f50/transformed/media3-datasource-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-datasource:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/6b9951b25c9270ec5fb1ac25d57d0f50/transformed/media3-datasource-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-decoder:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c85b77a22747ca980daa8c9b30a60981/transformed/media3-decoder-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-decoder:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c85b77a22747ca980daa8c9b30a60981/transformed/media3-decoder-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-database:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c751088656c69b635ff8d6d562959830/transformed/media3-database-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-database:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/c751088656c69b635ff8d6d562959830/transformed/media3-database-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-common:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/7eb088ae1ccba102a479dc69ecd8ef64/transformed/media3-common-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-common:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/7eb088ae1ccba102a479dc69ecd8ef64/transformed/media3-common-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-exoplayer:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/3607f82bc781e017a7968f9db478da71/transformed/media3-exoplayer-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-exoplayer:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/3607f82bc781e017a7968f9db478da71/transformed/media3-exoplayer-1.4.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media:media:1.7.0] /home/ubuntu/.gradle/caches/transforms-4/f4dbd72abeeb63cc2af322b0e204c3dd/transformed/media-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.media:media:1.7.0] /home/ubuntu/.gradle/caches/transforms-4/f4dbd72abeeb63cc2af322b0e204c3dd/transformed/media-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.3.0] /home/ubuntu/.gradle/caches/transforms-4/3b281bcc8b8d936aaabac750985c6bc2/transformed/recyclerview-1.3.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.3.0] /home/ubuntu/.gradle/caches/transforms-4/3b281bcc8b8d936aaabac750985c6bc2/transformed/recyclerview-1.3.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] /home/ubuntu/.gradle/caches/transforms-4/1a52f6c07cba32f7511408fc5dfbe681/transformed/customview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] /home/ubuntu/.gradle/caches/transforms-4/1a52f6c07cba32f7511408fc5dfbe681/transformed/customview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /home/ubuntu/.gradle/caches/transforms-4/c79f7ae19e07afaabcd99a24f26f526b/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /home/ubuntu/.gradle/caches/transforms-4/c79f7ae19e07afaabcd99a24f26f526b/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.core:core-ktx:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/b14a5ac4c688f983aa9ad97be20c908b/transformed/core-ktx-1.9.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/b14a5ac4c688f983aa9ad97be20c908b/transformed/core-ktx-1.9.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/ubuntu/.gradle/caches/transforms-4/8283203b80fa64dcee6eceaa080698e2/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/ubuntu/.gradle/caches/transforms-4/8283203b80fa64dcee6eceaa080698e2/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] /home/ubuntu/.gradle/caches/transforms-4/903707b27cb0ff5c6fd4007dddfaee65/transformed/exifinterface-1.3.6/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] /home/ubuntu/.gradle/caches/transforms-4/903707b27cb0ff5c6fd4007dddfaee65/transformed/exifinterface-1.3.6/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.3.1] /home/ubuntu/.gradle/caches/transforms-4/45a9c2c9a964593e07377c5572435907/transformed/lifecycle-runtime-2.3.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.3.1] /home/ubuntu/.gradle/caches/transforms-4/45a9c2c9a964593e07377c5572435907/transformed/lifecycle-runtime-2.3.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.arch.core:core-runtime:2.1.0] /home/ubuntu/.gradle/caches/transforms-4/ebaa3bb6eb2a505380f2287fc2631e28/transformed/core-runtime-2.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.arch.core:core-runtime:2.1.0] /home/ubuntu/.gradle/caches/transforms-4/ebaa3bb6eb2a505380f2287fc2631e28/transformed/core-runtime-2.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.annotation:annotation-experimental:1.3.1] /home/ubuntu/.gradle/caches/transforms-4/8a32381aff4d6885b198d70d3379c5df/transformed/annotation-experimental-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.3.1] /home/ubuntu/.gradle/caches/transforms-4/8a32381aff4d6885b198d70d3379c5df/transformed/annotation-experimental-1.3.1/AndroidManifest.xml:20:5-44
+	android:targetSdkVersion
+		INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/ubuntu/emurph-tv/app/src/main/AndroidManifest.xml
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from [androidx.media3:media3-common:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/7eb088ae1ccba102a479dc69ecd8ef64/transformed/media3-common-1.4.1/AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-exoplayer:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/3607f82bc781e017a7968f9db478da71/transformed/media3-exoplayer-1.4.1/AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-exoplayer:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/3607f82bc781e017a7968f9db478da71/transformed/media3-exoplayer-1.4.1/AndroidManifest.xml:22:5-79
+	android:name
+		ADDED from [androidx.media3:media3-common:1.4.1] /home/ubuntu/.gradle/caches/transforms-4/7eb088ae1ccba102a479dc69ecd8ef64/transformed/media3-common-1.4.1/AndroidManifest.xml:22:22-76
+permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+permission#app.emurph.tv.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
+uses-permission#app.emurph.tv.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/AndroidManifest.xml:26:22-94

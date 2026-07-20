@@ -368,18 +368,48 @@ public class MainActivity extends Activity {
                   "<line x1='92' y1='28' x2='86' y2='48'/>" +
                   "</g></svg>";
         } else {
-            // Radio with broadcast waves
+            // Radio with broadcast waves - elaborate design matching reference
             svg = "<svg viewBox='0 0 120 120'><defs>" +
-                  "<linearGradient id='rg' x1='0' x2='1'><stop stop-color='#2478ff'/><stop offset='1' stop-color='#ff315d'/></linearGradient>" +
+                  "<linearGradient id='rg' x1='0%' y1='0%' x2='100%' y2='0%'>" +
+                  "<stop offset='0%' stop-color='#2478ff'/><stop offset='100%' stop-color='#ff315d'/></linearGradient>" +
+                  "<linearGradient id='rg2' x1='0%' y1='0%' x2='0%' y2='100%'>" +
+                  "<stop offset='0%' stop-color='#4499ff'/><stop offset='100%' stop-color='#1a3080'/></linearGradient>" +
+                  "<filter id='glow'><feGaussianBlur stdDeviation='2' result='blur'/><feMerge><feMergeNode in='blur'/><feMergeNode in='SourceGraphic'/></feMerge></filter>" +
                   "</defs>" +
-                  "<g fill='none' stroke='url(#rg)' stroke-width='5'>" +
-                  "<rect x='24' y='52' width='72' height='46' rx='8'/>" +
-                  "<circle cx='60' cy='75' r='10'/>" +
-                  "<line x1='24' y1='52' x2='96' y2='52'/>" +
-                  "<path d='M40 52L50 28M80 52L70 28' stroke-linecap='round'/>" +
-                  "<path d='M96 38q14 14 0 28' stroke-linecap='round'/>" +
-                  "<path d='M104 30q22 22 0 44' stroke-linecap='round'/>" +
-                  "</g></svg>";
+                  // Broadcast arcs left
+                  "<g fill='none' stroke-linecap='round' filter='url(#glow)'>" +
+                  "<path d='M28 60 a22 22 0 0 1 0-20' stroke='#2478ff' stroke-width='4' opacity='.7'/>" +
+                  "<path d='M20 64 a32 32 0 0 1 0-28' stroke='#2478ff' stroke-width='3.5' opacity='.5'/>" +
+                  "<path d='M12 68 a42 42 0 0 1 0-36' stroke='#2478ff' stroke-width='3' opacity='.3'/>" +
+                  // Broadcast arcs right
+                  "<path d='M92 60 a22 22 0 0 0 0-20' stroke='#ff315d' stroke-width='4' opacity='.7'/>" +
+                  "<path d='M100 64 a32 32 0 0 0 0-28' stroke='#ff315d' stroke-width='3.5' opacity='.5'/>" +
+                  "<path d='M108 68 a42 42 0 0 0 0-36' stroke='#ff315d' stroke-width='3' opacity='.3'/>" +
+                  "</g>" +
+                  // Radio body
+                  "<rect x='28' y='52' width='64' height='42' rx='8' fill='url(#rg2)' stroke='url(#rg)' stroke-width='2.5'/>" +
+                  // Speaker grille
+                  "<rect x='34' y='58' width='28' height='28' rx='4' fill='none' stroke='#4488ff' stroke-width='1.5' opacity='.6'/>" +
+                  "<circle cx='48' cy='72' r='10' fill='none' stroke='url(#rg)' stroke-width='2'/>" +
+                  "<circle cx='48' cy='72' r='4' fill='url(#rg)'/>" +
+                  // Tuner dial
+                  "<circle cx='76' cy='68' r='9' fill='none' stroke='#ff315d' stroke-width='2'/>" +
+                  "<circle cx='76' cy='68' r='3' fill='#ff315d'/>" +
+                  // Antenna
+                  "<line x1='72' y1='52' x2='62' y2='24' stroke='white' stroke-width='3' stroke-linecap='round'/>" +
+                  "<circle cx='62' cy='24' r='3' fill='white'/>" +
+                  // Equalizer bars at bottom
+                  "<g fill='url(#rg)' opacity='.9'>" +
+                  "<rect x='34' y='88' width='4' height='6' rx='1'/>" +
+                  "<rect x='40' y='84' width='4' height='10' rx='1'/>" +
+                  "<rect x='46' y='80' width='4' height='14' rx='1'/>" +
+                  "<rect x='52' y='83' width='4' height='11' rx='1'/>" +
+                  "<rect x='58' y='86' width='4' height='8' rx='1'/>" +
+                  "<rect x='64' y='82' width='4' height='12' rx='1'/>" +
+                  "<rect x='70' y='85' width='4' height='9' rx='1'/>" +
+                  "<rect x='76' y='88' width='4' height='6' rx='1'/>" +
+                  "</g>" +
+                  "</svg>";
         }
         return "<div class='card " + cls + "' tabindex='" + tab + "' onclick='" + click + "'>" +
                badge +

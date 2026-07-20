@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "app.emurph.tv.app-mergeDebugResources-11:/values-en-rCA/values-en-rCA.xml",
+            "map": [
+                {
+                    "source": "/home/ubuntu/.gradle/caches/transforms-4/62bd5f0c933634171ed4412e7920dc4c/transformed/core-1.9.0/res/values-en-rCA/values-en-rCA.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "100",
+                        "endOffsets": "151"
+                    }
+                }
+            ]
+        }
+    ]
+}
