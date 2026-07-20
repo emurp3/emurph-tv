@@ -2,7 +2,7 @@
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
 3    package="app.emurph.tv"
 4    android:versionCode="5"
-5    android:versionName="1.4.0" >
+5    android:versionName="1.5.0" >
 6
 7    <uses-sdk
 8        android:minSdkVersion="23"
