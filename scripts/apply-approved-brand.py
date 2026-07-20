@@ -9,15 +9,12 @@ new_css = "@import url('https://fonts.googleapis.com/css2?family=Knewave&display
 old_logo = "<div class='top'><div class='logo'>EMurph <b>TV</b><span class='antenna'>⌁</span></div>"
 new_logo = "<div class='top'><div class='logo'><span class='em'>EMURPH</span> <span class='tvbox'><span class='tv'>TV</span></span></div>"
 
-old_body = "</div><div class='footer'><span>▣ &nbsp; Expiration: <strong>"+exp+"</strong></span><span>👤 &nbsp; Logged in: <strong>"+user+"</strong></span></div></div>"
-new_body = "</div><div class='footer'><span>▣ &nbsp; Expiration: <strong>"+exp+"</strong></span><span>👤 &nbsp; Logged in: <strong>"+user+"</strong></span></div></div><div class='brandbar'><div class='brandmark'><span class='em'>EMURPH</span> <span class='tvbox'><span class='tv'>TV</span></span></div><div class='tagline'>STREAM. LISTEN. INSPIRE.</div><div class='pillars'><span class='faith'>FAITH</span> • <span class='music'>MUSIC</span> • <span class='ent'>ENTERTAINMENT</span></div></div>"
+old_body = "</div><div class='footer'><span>▣ &nbsp; Expiration: <strong>\"+exp+\"</strong></span><span>👤 &nbsp; Logged in: <strong>\"+user+\"</strong></span></div></div>"
+new_body = "</div><div class='footer'><span>▣ &nbsp; Expiration: <strong>\"+exp+\"</strong></span><span>👤 &nbsp; Logged in: <strong>\"+user+\"</strong></span></div></div><div class='brandbar'><div class='brandmark'><span class='em'>EMURPH</span> <span class='tvbox'><span class='tv'>TV</span></span></div><div class='tagline'>STREAM. LISTEN. INSPIRE.</div><div class='pillars'><span class='faith'>FAITH</span> • <span class='music'>MUSIC</span> • <span class='ent'>ENTERTAINMENT</span></div></div>"
 
-if old_css not in s:
-    raise SystemExit('Expected logo CSS block not found')
-if old_logo not in s:
-    raise SystemExit('Expected top logo block not found')
-if old_body not in s:
-    raise SystemExit('Expected footer block not found')
+for needle, label in ((old_css, 'logo CSS'), (old_logo, 'top logo'), (old_body, 'footer')):
+    if needle not in s:
+        raise SystemExit(f'Expected {label} block not found')
 
 s = s.replace(old_css, new_css, 1)
 s = s.replace(old_logo, new_logo, 1)
