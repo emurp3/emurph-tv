@@ -133,12 +133,12 @@ public class MainActivity extends Activity {
         String movImg   = "<img class=\'bg\' src=\'data:image/jpeg;base64,"+B64_MOVIES+"\' alt=\'\'>";
         String serImg   = "<img class=\'bg\' src=\'data:image/jpeg;base64,"+B64_SERIES+"\' alt=\'\'>";
         String radImg   = "<img class=\'bg\' src=\'data:image/jpeg;base64,"+B64_RADIO+"\' alt=\'\'>";
-        String brandImg = "<img src=\'data:image/jpeg;base64,"+B64_BRAND+"\' style=\'width:100%;height:100%;object-fit:fill;position:absolute;inset:0;z-index:0\' alt=\'EMurph TV\'>";
+        String brandImg = "<img src=\'data:image/jpeg;base64,"+B64_BRAND+"\' style=\'width:100%;height:100%;object-fit:cover;object-position:center;position:absolute;inset:0;z-index:0\' alt=\'EMurph TV\'>";
         return "<!doctype html><html><head><meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'><style>" +
         "*{box-sizing:border-box;margin:0;padding:0}" +
         "html,body{width:100%;height:100%;overflow:hidden;color:#fff;font-family:\'Arial Black\',Arial,sans-serif;background:#020611}" +
         "body{background:radial-gradient(ellipse at 8% 85%,rgba(18,80,220,.28),transparent 35%),radial-gradient(ellipse at 92% 78%,rgba(220,28,72,.18),transparent 30%),linear-gradient(180deg,#030818 0%,#020510 100%)}" +
-        ".wrap{height:100vh;padding:14px 28px 10px;display:grid;grid-template-rows:64px 28vh 68px 40px 140px;gap:10px}" +
+        ".wrap{height:100vh;padding:14px 28px 10px;display:grid;grid-template-rows:64px 28vh 68px 40px 200px;gap:10px}" +
         ".hdr{display:grid;grid-template-columns:auto 1fr 52px 52px 52px 52px 78px;gap:8px;align-items:center}" +
         ".logo{height:60px;object-fit:contain;object-position:left center}" +
         ".search{height:46px;border:1px solid #253550;background:linear-gradient(180deg,#0d1828,#070d1c);border-radius:9px;color:#c0d0e8;display:flex;align-items:center;padding:0 16px;gap:10px;font-size:15px}" +
@@ -146,9 +146,9 @@ public class MainActivity extends Activity {
         ".hbtn{height:46px;border:1px solid #253550;background:linear-gradient(180deg,#0d1828,#070d1c);border-radius:9px;color:#eaf0ff;display:flex;align-items:center;justify-content:center;position:relative}" +
         ".hbtn .badge{position:absolute;top:5px;right:6px;background:#ef1a3a;border-radius:50%;width:15px;height:15px;font-size:8px;display:flex;align-items:center;justify-content:center;font-weight:900}" +
         ".sw{height:46px;border:1px solid #253550;background:linear-gradient(180deg,#0d1828,#070d1c);border-radius:9px;color:#eaf0ff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;gap:2px;padding:0 4px}" +
-        ".cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;min-height:0}" +
+        ".cards{display:grid;grid-template-columns:1fr 1fr 1fr 1.4fr;gap:12px;min-height:0}" +
         ".card{position:relative;overflow:hidden;border:1px solid #2a3e68;border-radius:12px;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;cursor:pointer;height:100%}" +
-        ".card .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;opacity:.75}" +
+        ".card .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;opacity:.75}.radio .bg{object-fit:fill}" +
         ".card .grad{display:none}" +
         ".live .grad{background:linear-gradient(180deg,rgba(8,40,120,.55) 0%,rgba(4,20,70,.85) 60%,rgba(2,10,40,.97) 100%)}" +
         ".movies .grad{background:linear-gradient(180deg,rgba(100,10,20,.55) 0%,rgba(70,6,14,.85) 60%,rgba(30,3,8,.97) 100%)}" +
