@@ -17,6 +17,9 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Apply approved EMurph TV branding
+        run: python3 scripts/apply-approved-brand.py
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
@@ -48,5 +51,3 @@ jobs:
           path: EMurph-TV-nightly.apk
           if-no-files-found: error
           retention-days: 14
-
-# Build trigger refreshed for the branded gradient release on 2026-07-19.
