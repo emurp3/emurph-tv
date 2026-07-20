@@ -1,0 +1,62 @@
+name: Publish EMurph TV APK
+
+on:
+  workflow_run:
+    workflows: ["Build EMurph TV APK"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download latest successful APK artifact
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: build-apk.yml
+          workflow_conclusion: success
+          name: EMurph-TV-debug
+          path: public
+
+      - name: Prepare public download site
+        run: |
+          mv public/EMurph-TV-nightly.apk public/EMurph-TV.apk
+          cat > public/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EMurph TV Download</title></head>
+          <body style="font-family:Arial,sans-serif;background:#050713;color:white;display:grid;place-items:center;min-height:100vh;margin:0">
+            <main style="text-align:center;max-width:640px;padding:40px">
+              <h1>EMurph TV</h1>
+              <p>Fire TV / Android installation package</p>
+              <p><a href="EMurph-TV.apk" style="display:inline-block;padding:16px 24px;background:linear-gradient(90deg,#1267ff,#ed1944);color:white;text-decoration:none;border-radius:10px;font-weight:bold">Download EMurph TV</a></p>
+            </main>
+          </body>
+          </html>
+          HTML
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
