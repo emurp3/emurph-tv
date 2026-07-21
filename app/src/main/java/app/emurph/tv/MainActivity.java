@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient());
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
-        web.loadDataWithBaseURL(null, homeHtml(), "text/html", "UTF-8", null);
+        web.loadDataWithBaseURL("https://emurph.tv/", homeHtml(), "text/html", "UTF-8", null);
         setContentView(web);
         web.requestFocus();
     }
@@ -341,7 +341,7 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient());
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
-        web.loadDataWithBaseURL(null, usersHtml(), "text/html", "UTF-8", null);
+        web.loadDataWithBaseURL("https://emurph.tv/", usersHtml(), "text/html", "UTF-8", null);
         setContentView(web);
         web.requestFocus();
     }
@@ -431,7 +431,7 @@ public class MainActivity extends Activity {
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
         String defaultServer = esc(prefs.getString("default_server_url", defaultServerUrl));
-        web.loadDataWithBaseURL(null, addUserHtml(defaultServer), "text/html", "UTF-8", null);
+        web.loadDataWithBaseURL("https://emurph.tv/", addUserHtml(defaultServer), "text/html", "UTF-8", null);
         setContentView(web);
         web.requestFocus();
     }
