@@ -238,7 +238,7 @@ public class MainActivity extends Activity {
         "</div>" +
         "</div>" +
         announce +
-        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;if(el&&el!==document.body){e.preventDefault();el.click();}}});</script></body></html>";
+        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;var tag=el?el.tagName.toUpperCase():'';if(el&&tag!=='INPUT'&&tag!=='TEXTAREA'&&el!==document.body){e.preventDefault();el.click();}}});</script></body></html>";
     }
 
 
@@ -401,7 +401,7 @@ public class MainActivity extends Activity {
         "</div></div>" +
         "<div class=\'grid\'>" + cards.toString() + "</div>" +
         "<div class=\'hint\'><svg width=\'14\' height=\'14\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'12\' cy=\'12\' r=\'10\'/><line x1=\'12\' y1=\'8\' x2=\'12\' y2=\'12\'/><line x1=\'12\' y1=\'16\' x2=\'12.01\' y2=\'16\'/></svg>Select a user profile to continue</div>" +
-        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;if(el&&el!==document.body){e.preventDefault();el.click();}}});</script></div></body></html>";
+        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;var tag=el?el.tagName.toUpperCase():'';if(el&&tag!=='INPUT'&&tag!=='TEXTAREA'&&el!==document.body){e.preventDefault();el.click();}}});</script></div></body></html>";
     }
 
 
@@ -478,7 +478,7 @@ public class MainActivity extends Activity {
         "<button class=\'btn2\' tabindex=\'7\' onclick=\'android.showUsers();\'><svg width=\'16\' height=\'16\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'9\' cy=\'7\' r=\'4\'/><path d=\'M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2\'/><line x1=\'19\' y1=\'8\' x2=\'19\' y2=\'14\'/><line x1=\'22\' y1=\'11\' x2=\'16\' y2=\'11\'/></svg>LIST USERS</button>" +
         "<button class=\'btn2\' tabindex=\'8\' onclick=\'android.connectVPN();\'><svg width=\'16\' height=\'16\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\'/></svg>CONNECT VPN</button>" +
         "</div></div></div>" +
-        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;if(el&&el!==document.body){e.preventDefault();el.click();}}});</script></body></html>";
+        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;var tag=el?el.tagName.toUpperCase():'';if(el&&tag!=='INPUT'&&tag!=='TEXTAREA'&&el!==document.body){e.preventDefault();el.click();}}});</script></body></html>";
     }
 
 
