@@ -97,19 +97,10 @@ public class MainActivity extends Activity {
         web.getSettings().setDomStorageEnabled(true);
         web.addJavascriptInterface(new Bridge(), "EMurph"); web.addJavascriptInterface(new Bridge(), "android");
         web.setWebChromeClient(new WebChromeClient());
-        web.setWebViewClient(new android.webkit.WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(android.webkit.WebView view, String url) {
-                if (url != null && url.startsWith("emurph://")) {
-                    handleEmurphUrl(url);
-                    return true;
-                }
-                return false;
-            }
-        });
+        web.setWebViewClient(new WebViewClient());
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
-        web.loadDataWithBaseURL("https://emurph.tv/", homeHtml(), "text/html", "UTF-8", null);
+        web.loadDataWithBaseURL(null, homeHtml(), "text/html", "UTF-8", null);
         setContentView(web);
         web.requestFocus();
     }
@@ -203,26 +194,26 @@ public class MainActivity extends Activity {
         "<div class=\'hbtn\' tabindex=\'2\'><svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\'/><path d=\'M13.73 21a2 2 0 0 1-3.46 0\'/></svg><span class=\'badge\'>3</span></div>" +
         "<div class=\'hbtn\' tabindex=\'3\'><svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'12\' cy=\'8\' r=\'4\'/><path d=\'M4 20c0-4 3.6-7 8-7s8 3 8 7\'/></svg></div>" +
         "<div class=\'hbtn\' tabindex=\'4\' style=\'font-size:9px;font-weight:900;letter-spacing:.5px;color:#ef1a3a;border-color:#3a1a1a\'>REC<span style=\'display:inline-block;width:7px;height:7px;background:#ef1a3a;border-radius:50%;margin-left:3px\'></span></div>" +
-        "<div class=\'hbtn\' tabindex=\'5\' onclick=\'location.href=\'emurph://settings\';\'><svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'12\' cy=\'12\' r=\'3\'/><path d=\'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z\'/></svg></div>" +
-        "<div class=\'sw\' tabindex=\'6\' onclick=\'location.href=\'emurph://showUsers\';\'><svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'12\' cy=\'8\' r=\'4\'/><path d=\'M4 20c0-4 3.6-7 8-7s8 3 8 7\'/><path d=\'M19 8l2 2-2 2\' stroke-linecap=\'round\'/></svg><span>Switch User</span></div>" +
+        "<div class=\'hbtn\' tabindex=\'5\' onclick=\'android.settings();\'><svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'12\' cy=\'12\' r=\'3\'/><path d=\'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z\'/></svg></div>" +
+        "<div class=\'sw\' tabindex=\'6\' onclick=\'android.showUsers();\'><svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'12\' cy=\'8\' r=\'4\'/><path d=\'M4 20c0-4 3.6-7 8-7s8 3 8 7\'/><path d=\'M19 8l2 2-2 2\' stroke-linecap=\'round\'/></svg><span>Switch User</span></div>" +
         "</div>" +
         "<div class=\'cards\'>" +
-        "<div class=\'card live\' tabindex=\'7\' onclick=\'location.href=\'emurph://loadLiveTV\';\'>" +
+        "<div class=\'card live\' tabindex=\'7\' onclick=\'android.loadLiveTV();\'>" +
         liveImg +
         "<div class=\'grad\'></div>" +
         "<div class=\'art\'><svg width=\'96\' height=\'96\' viewBox=\'0 0 120 120\'><g fill=\'none\' stroke=\'white\' stroke-width=\'4.5\' stroke-linecap=\'round\'><rect x=\'14\' y=\'28\' width=\'92\' height=\'58\' rx=\'9\'/><line x1=\'60\' y1=\'28\' x2=\'46\' y2=\'14\'/><line x1=\'60\' y1=\'28\' x2=\'74\' y2=\'14\'/><circle cx=\'60\' cy=\'28\' r=\'3.5\' fill=\'white\'/><line x1=\'42\' y1=\'94\' x2=\'78\' y2=\'94\'/><line x1=\'60\' y1=\'86\' x2=\'60\' y2=\'94\'/></g><polygon points=\'50,44 50,76 86,60\' fill=\'white\' opacity=\'.9\'/></svg></div>" +
         "<h2>LIVE TV</h2><p>Watch Live Channels</p></div>" +
-        "<div class=\'card movies\' tabindex=\'8\' onclick=\'location.href=\'emurph://loadMovies\';\'>" +
+        "<div class=\'card movies\' tabindex=\'8\' onclick=\'android.loadMovies();\'>" +
         movImg +
         "<div class=\'grad\'></div>" +
         "<div class=\'art\'><svg width=\'96\' height=\'96\' viewBox=\'0 0 120 120\'><circle cx=\'60\' cy=\'60\' r=\'42\' fill=\'none\' stroke=\'white\' stroke-width=\'4.5\'/><circle cx=\'60\' cy=\'60\' r=\'14\' fill=\'none\' stroke=\'white\' stroke-width=\'4\'/><circle cx=\'60\' cy=\'28\' r=\'7.5\' fill=\'white\'/><circle cx=\'87\' cy=\'45\' r=\'7.5\' fill=\'white\'/><circle cx=\'87\' cy=\'75\' r=\'7.5\' fill=\'white\'/><circle cx=\'60\' cy=\'92\' r=\'7.5\' fill=\'white\'/><circle cx=\'33\' cy=\'75\' r=\'7.5\' fill=\'white\'/><circle cx=\'33\' cy=\'45\' r=\'7.5\' fill=\'white\'/></svg></div>" +
         "<h2>MOVIES</h2><p>Thousands of Movies</p></div>" +
-        "<div class=\'card series\' tabindex=\'9\' onclick=\'location.href=\'emurph://loadSeries\';\'>" +
+        "<div class=\'card series\' tabindex=\'9\' onclick=\'android.loadSeries();\'>" +
         serImg +
         "<div class=\'grad\'></div>" +
         "<div class=\'art\'><svg width=\'96\' height=\'96\' viewBox=\'0 0 120 120\'><g fill=\'none\' stroke=\'white\' stroke-width=\'4.5\'><rect x=\'16\' y=\'42\' width=\'88\' height=\'56\' rx=\'7\'/><rect x=\'16\' y=\'26\' width=\'88\' height=\'20\' rx=\'5\'/><line x1=\'36\' y1=\'26\' x2=\'30\' y2=\'46\'/><line x1=\'55\' y1=\'26\' x2=\'49\' y2=\'46\'/><line x1=\'74\' y1=\'26\' x2=\'68\' y2=\'46\'/><line x1=\'93\' y1=\'26\' x2=\'87\' y2=\'46\'/></g></svg></div>" +
         "<h2>SERIES</h2><p>Binge Worthy Shows</p></div>" +
-        "<div class=\'card radio\' tabindex=\'10\' onclick=\'location.href=\'emurph://loadRadio\';\'>" +
+        "<div class=\'card radio\' tabindex=\'10\' onclick=\'android.loadRadio();\'>" +
         "<span class=\'featured\'>FEATURED</span>" +
         radImg +
         "<div class=\'grad\'></div>" +
@@ -247,7 +238,7 @@ public class MainActivity extends Activity {
         "</div>" +
         "</div>" +
         announce +
-        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;var tag=el?el.tagName.toUpperCase():'';if(el&&tag!=='INPUT'&&tag!=='TEXTAREA'&&el!==document.body){e.preventDefault();el.click();}}});</script></body></html>";
+        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;if(el&&el!==document.body){e.preventDefault();el.click();}}});</script></body></html>";
     }
 
 
@@ -320,50 +311,6 @@ public class MainActivity extends Activity {
                "</div>";
     }
 
-    private void handleEmurphUrl(String url) {
-        try {
-            android.net.Uri uri = android.net.Uri.parse(url);
-            String host = uri.getHost();
-            String action = (host != null && !host.isEmpty()) ? host
-                          : url.replace("emurph://", "").replaceAll("\\?.*", "");
-            switch (action) {
-                case "loadLiveTV":  runOnUiThread(() -> browseNative("live"));    break;
-                case "loadMovies":  runOnUiThread(() -> browseNative("movies"));  break;
-                case "loadSeries":  runOnUiThread(() -> browseNative("series"));  break;
-                case "loadRadio":   runOnUiThread(() -> showRadio());       break;
-                case "showUsers":   runOnUiThread(() -> showUsers());       break;
-                case "showAddUser": runOnUiThread(() -> showAddUser());     break;
-                case "settings":    runOnUiThread(() -> toast("Settings coming soon.")); break;
-                case "connectVPN":  runOnUiThread(() -> toast("VPN integration coming soon.")); break;
-                case "selectUser": {
-                    String name = uri.getQueryParameter("name");
-                    if (name != null) {
-                        String fn = name;
-                        runOnUiThread(() -> {
-                            SharedPreferences p = getSharedPreferences("emurph", MODE_PRIVATE);
-                            p.edit().putString("active_profile", fn).apply();
-                            showHome();
-                        });
-                    }
-                    break;
-                }
-                case "addUser": {
-                    String name   = uri.getQueryParameter("name");
-                    String user   = uri.getQueryParameter("user");
-                    String pass   = uri.getQueryParameter("pass");
-                    String server = uri.getQueryParameter("server");
-                    if (name != null && user != null && pass != null && server != null) {
-                        String fn=name, fu=user, fp=pass, fs=server;
-                        runOnUiThread(() -> addUserFromWeb(fn, fu, fp, fs));
-                    }
-                    break;
-                }
-                default: break;
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-    }
-
-
     public class Bridge {
         @JavascriptInterface public void masterSearch() { runOnUiThread(() -> showSearch()); }
         @JavascriptInterface public void users() { runOnUiThread(() -> showUsers()); }
@@ -391,19 +338,10 @@ public class MainActivity extends Activity {
         web.getSettings().setDomStorageEnabled(true);
         web.addJavascriptInterface(new UsersBridge(), "EMurph"); web.addJavascriptInterface(new UsersBridge(), "android");
         web.setWebChromeClient(new WebChromeClient());
-        web.setWebViewClient(new android.webkit.WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(android.webkit.WebView view, String url) {
-                if (url != null && url.startsWith("emurph://")) {
-                    handleEmurphUrl(url);
-                    return true;
-                }
-                return false;
-            }
-        });
+        web.setWebViewClient(new WebViewClient());
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
-        web.loadDataWithBaseURL("https://emurph.tv/", usersHtml(), "text/html", "UTF-8", null);
+        web.loadDataWithBaseURL(null, usersHtml(), "text/html", "UTF-8", null);
         setContentView(web);
         web.requestFocus();
     }
@@ -423,7 +361,7 @@ public class MainActivity extends Activity {
                     String server = esc(p.optString("server","EMurph TV Main"));
                     boolean active = p.optString("username","").equals(activeProfile);
                     String check = active ? "<div class=\'check\'><svg width=\'22\' height=\'22\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'#1a6bff\' stroke-width=\'2.5\'><circle cx=\'12\' cy=\'12\' r=\'10\'/><polyline points=\'9 12 11 14 15 10\'/></svg></div>" : "";
-                    cards.append("<div class=\'ucard"+(active?" active":"")+"\' tabindex=\'"+tabIdx+"\' onclick=\'location.href=\'emurph://selectUser?name=\'+encodeURIComponent(uname)+\'\';\'>");
+                    cards.append("<div class=\'ucard"+(active?" active":"")+"\' tabindex=\'"+tabIdx+"\' onclick=\'android.selectUser(\""+uname+"\");\'>");
                     cards.append("<div class=\'avatar\'><svg width=\'28\' height=\'28\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'#4a70a8\' stroke-width=\'2\'><circle cx=\'12\' cy=\'8\' r=\'4\'/><path d=\'M4 20c0-4 3.6-7 8-7s8 3 8 7\'/></svg></div>");
                     cards.append("<div class=\'uinfo\'><b>"+name+"</b><small>Username: "+uname+"<br>Server: "+server+"</small></div>");
                     cards.append(check+"</div>");
@@ -459,11 +397,11 @@ public class MainActivity extends Activity {
         logoImg +
         "<div class=\'hdr-right\'>" +
         "<h1>LIST USERS</h1>" +
-        "<button class=\'add-btn\' tabindex=\'1\' onclick=\'location.href=\'emurph://showAddUser\';\'><svg width=\'14\' height=\'14\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\'><line x1=\'12\' y1=\'5\' x2=\'12\' y2=\'19\'/><line x1=\'5\' y1=\'12\' x2=\'19\' y2=\'12\'/></svg>ADD USER</button>" +
+        "<button class=\'add-btn\' tabindex=\'1\' onclick=\'android.showAddUser();\'><svg width=\'14\' height=\'14\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\'><line x1=\'12\' y1=\'5\' x2=\'12\' y2=\'19\'/><line x1=\'5\' y1=\'12\' x2=\'19\' y2=\'12\'/></svg>ADD USER</button>" +
         "</div></div>" +
         "<div class=\'grid\'>" + cards.toString() + "</div>" +
         "<div class=\'hint\'><svg width=\'14\' height=\'14\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'12\' cy=\'12\' r=\'10\'/><line x1=\'12\' y1=\'8\' x2=\'12\' y2=\'12\'/><line x1=\'12\' y1=\'16\' x2=\'12.01\' y2=\'16\'/></svg>Select a user profile to continue</div>" +
-        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;var tag=el?el.tagName.toUpperCase():'';if(el&&tag!=='INPUT'&&tag!=='TEXTAREA'&&el!==document.body){e.preventDefault();el.click();}}});</script></div></body></html>";
+        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;if(el&&el!==document.body){e.preventDefault();el.click();}}});</script></div></body></html>";
     }
 
 
@@ -489,20 +427,11 @@ public class MainActivity extends Activity {
         web.getSettings().setDomStorageEnabled(true);
         web.addJavascriptInterface(new AddUserBridge(), "EMurph"); web.addJavascriptInterface(new AddUserBridge(), "android");
         web.setWebChromeClient(new WebChromeClient());
-        web.setWebViewClient(new android.webkit.WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(android.webkit.WebView view, String url) {
-                if (url != null && url.startsWith("emurph://")) {
-                    handleEmurphUrl(url);
-                    return true;
-                }
-                return false;
-            }
-        });
+        web.setWebViewClient(new WebViewClient());
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
         String defaultServer = esc(prefs.getString("default_server_url", defaultServerUrl));
-        web.loadDataWithBaseURL("https://emurph.tv/", addUserHtml(defaultServer), "text/html", "UTF-8", null);
+        web.loadDataWithBaseURL(null, addUserHtml(defaultServer), "text/html", "UTF-8", null);
         setContentView(web);
         web.requestFocus();
     }
@@ -543,13 +472,13 @@ public class MainActivity extends Activity {
         "<div class=\'field\'><svg width=\'18\' height=\'18\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'#4a6888\' stroke-width=\'2\'><circle cx=\'12\' cy=\'8\' r=\'4\'/><path d=\'M4 20c0-4 3.6-7 8-7s8 3 8 7\'/></svg><input id=\'uname\' placeholder=\'Username\' tabindex=\'2\'/></div>" +
         "<div class=\'field\'><svg width=\'18\' height=\'18\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'#4a6888\' stroke-width=\'2\'><rect x=\'3\' y=\'11\' width=\'18\' height=\'11\' rx=\'2\'/><path d=\'M7 11V7a5 5 0 0 1 10 0v4\'/></svg><input id=\'pass\' type=\'password\' placeholder=\'Password\' tabindex=\'3\'/><span class=\'eye\' tabindex=\'4\' onclick=\'var i=document.getElementById(\\\'pass\\\');i.type=i.type==\\\'password\\\'?\\\'text\\\':\\\'password\\\';\'><svg width=\'18\' height=\'18\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'#4a6888\' stroke-width=\'2\'><path d=\'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\'/><circle cx=\'12\' cy=\'12\' r=\'3\'/></svg></span></div>" +
         "<div class=\'field\'><svg width=\'18\' height=\'18\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'#4a6888\' stroke-width=\'2\'><rect x=\'2\' y=\'6\' width=\'20\' height=\'12\' rx=\'2\'/><path d=\'M2 10h20\'/><path d=\'M6 14h.01\'/><path d=\'M10 14h4\'/></svg><input id=\'surl\' placeholder=\'Server URL\' value=\'" + ds + "\' tabindex=\'5\'/></div>" +
-        "<button class=\'submit\' tabindex=\'6\' onclick=\'location.href=\'emurph://addUser?name=\'+encodeURIComponent(document.getElementById(\\\'pname\\\').value)+\'&user=\'+encodeURIComponent(document.getElementById(\\\'uname\\\').value)+\'&pass=\'+encodeURIComponent(document.getElementById(\\\'pass\\\').value)+\'&server=\'+encodeURIComponent(document.getElementById(\\\'surl\\\').value)\'>" +
+        "<button class=\'submit\' tabindex=\'6\' onclick=\'android.addUser(document.getElementById(\\\'pname\\\').value,document.getElementById(\\\'uname\\\').value,document.getElementById(\\\'pass\\\').value,document.getElementById(\\\'surl\\\').value);\'>" +
         "ADD USER</button>" +
         "<div class=\'btns\'>" +
-        "<button class=\'btn2\' tabindex=\'7\' onclick=\'location.href=\'emurph://showUsers\';\'><svg width=\'16\' height=\'16\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'9\' cy=\'7\' r=\'4\'/><path d=\'M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2\'/><line x1=\'19\' y1=\'8\' x2=\'19\' y2=\'14\'/><line x1=\'22\' y1=\'11\' x2=\'16\' y2=\'11\'/></svg>LIST USERS</button>" +
-        "<button class=\'btn2\' tabindex=\'8\' onclick=\'location.href=\'emurph://connectVPN\';\'><svg width=\'16\' height=\'16\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\'/></svg>CONNECT VPN</button>" +
+        "<button class=\'btn2\' tabindex=\'7\' onclick=\'android.showUsers();\'><svg width=\'16\' height=\'16\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'9\' cy=\'7\' r=\'4\'/><path d=\'M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2\'/><line x1=\'19\' y1=\'8\' x2=\'19\' y2=\'14\'/><line x1=\'22\' y1=\'11\' x2=\'16\' y2=\'11\'/></svg>LIST USERS</button>" +
+        "<button class=\'btn2\' tabindex=\'8\' onclick=\'android.connectVPN();\'><svg width=\'16\' height=\'16\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\'/></svg>CONNECT VPN</button>" +
         "</div></div></div>" +
-        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;var tag=el?el.tagName.toUpperCase():'';if(el&&tag!=='INPUT'&&tag!=='TEXTAREA'&&el!==document.body){e.preventDefault();el.click();}}});</script></body></html>";
+        "<script>document.addEventListener('keydown',function(e){if(e.keyCode===13||e.keyCode===23||e.keyCode===32){var el=document.activeElement;if(el&&el!==document.body){e.preventDefault();el.click();}}});</script></body></html>";
     }
 
 
