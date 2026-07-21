@@ -155,7 +155,7 @@ public class MainActivity extends Activity {
         ".sw{height:46px;border:1px solid #253550;background:linear-gradient(180deg,#0d1828,#070d1c);border-radius:9px;color:#eaf0ff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;gap:2px;padding:0 4px}" +
         ".cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;min-height:0}" +
         ".card{position:relative;overflow:hidden;border:1px solid #2a3e68;border-radius:12px;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;cursor:pointer;height:100%}" +
-        ".card .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;background:#000;z-index:0;opacity:1}" +
+        ".card .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;background:#000;z-index:0;opacity:1}" +
         ".card .grad{position:absolute;inset:0;z-index:1}" +
         ".live .grad{background:linear-gradient(180deg,transparent 0%,transparent 70%,rgba(0,5,20,.3) 100%)}" +
         ".movies .grad{background:linear-gradient(180deg,transparent 0%,transparent 70%,rgba(20,0,5,.3) 100%)}" +
@@ -487,7 +487,9 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> addUserFromWeb(name, user, pass, server));
         }
         @JavascriptInterface public void listUsers() { runOnUiThread(() -> showUsers()); }
+        @JavascriptInterface public void showUsers() { runOnUiThread(() -> MainActivity.this.showUsers()); }
         @JavascriptInterface public void connectVpn() { runOnUiThread(() -> toast("VPN integration coming soon.")); }
+        @JavascriptInterface public void connectVPN() { runOnUiThread(() -> toast("VPN integration coming soon.")); }
         @JavascriptInterface public void showMsg(String msg) { runOnUiThread(() -> toast(msg)); }
     }
 
