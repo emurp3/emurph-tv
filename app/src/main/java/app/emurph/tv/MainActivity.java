@@ -95,7 +95,7 @@ public class MainActivity extends Activity {
         web.setBackgroundColor(Color.rgb(2,5,16));
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
-        web.addJavascriptInterface(new Bridge(), "EMurph");
+        web.addJavascriptInterface(new Bridge(), "EMurph"); web.addJavascriptInterface(new Bridge(), "android");
         web.setWebChromeClient(new WebChromeClient());
         web.setWebViewClient(new WebViewClient());
         web.setFocusable(true);
@@ -318,6 +318,13 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void browse(String type) { runOnUiThread(() -> browseNative(type)); }
         @JavascriptInterface public void radio() { runOnUiThread(() -> showRadio()); }
         @JavascriptInterface public void loadRadio() { runOnUiThread(() -> showRadio()); }
+        @JavascriptInterface public void loadLiveTV() { runOnUiThread(() -> browseNative("live")); }
+        @JavascriptInterface public void loadMovies() { runOnUiThread(() -> browseNative("movies")); }
+        @JavascriptInterface public void loadSeries() { runOnUiThread(() -> browseNative("series")); }
+        @JavascriptInterface public void showAddUser() { runOnUiThread(() -> MainActivity.this.showAddUser()); }
+        @JavascriptInterface public void showUsers() { runOnUiThread(() -> MainActivity.this.showUsers()); }
+        @JavascriptInterface public void selectUser(String name) { runOnUiThread(() -> { activeProfile=name; prefs.edit().putString("active_profile",name).apply(); showHome(); }); }
+        @JavascriptInterface public void connectVPN() { runOnUiThread(() -> toast("VPN integration coming soon.")); }
         @JavascriptInterface public void message(String s) { runOnUiThread(() -> toast(s)); }
     }
 
@@ -329,7 +336,7 @@ public class MainActivity extends Activity {
         web.setBackgroundColor(Color.rgb(2,5,16));
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
-        web.addJavascriptInterface(new UsersBridge(), "EMurph");
+        web.addJavascriptInterface(new UsersBridge(), "EMurph"); web.addJavascriptInterface(new UsersBridge(), "android");
         web.setWebChromeClient(new WebChromeClient());
         web.setWebViewClient(new WebViewClient());
         web.setFocusable(true);
@@ -417,7 +424,7 @@ public class MainActivity extends Activity {
         web.setBackgroundColor(Color.rgb(2,5,16));
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
-        web.addJavascriptInterface(new AddUserBridge(), "EMurph");
+        web.addJavascriptInterface(new AddUserBridge(), "EMurph"); web.addJavascriptInterface(new AddUserBridge(), "android");
         web.setWebChromeClient(new WebChromeClient());
         web.setWebViewClient(new WebViewClient());
         web.setFocusable(true);
