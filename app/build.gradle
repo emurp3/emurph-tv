@@ -10,14 +10,24 @@ android {
         applicationId 'app.emurph.tv'
         minSdk 23
         targetSdk 35
-        versionCode 9
-        versionName '1.5.4'
+        versionCode 10
+        versionName '1.5.5'
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("../emurph-release.jks")
+            storePassword "emurphtv2024"
+            keyAlias "emurphtv"
+            keyPassword "emurphtv2024"
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }

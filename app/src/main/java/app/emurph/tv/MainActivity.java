@@ -145,7 +145,7 @@ public class MainActivity extends Activity {
         "*{box-sizing:border-box;margin:0;padding:0}" +
         "html,body{width:100%;height:100%;overflow:hidden;color:#fff;font-family:\'Arial Black\',Arial,sans-serif;background:#020611}" +
         "body{background:radial-gradient(ellipse at 8% 85%,rgba(18,80,220,.28),transparent 35%),radial-gradient(ellipse at 92% 78%,rgba(220,28,72,.18),transparent 30%),linear-gradient(180deg,#030818 0%,#020510 100%)}" +
-        ".wrap{height:100vh;padding:14px 28px 10px;display:grid;grid-template-rows:90px 40vh 68px 40px 220px;gap:10px}" +
+        ".wrap{height:100vh;padding:14px 28px 10px;display:grid;grid-template-rows:90px 35vh 68px 40px 220px;gap:10px}" +
         ".hdr{display:grid;grid-template-columns:290px 1fr 52px 52px 52px 52px 90px;align-items:center;height:90px;padding:0 8px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);position:relative;z-index:10;overflow:visible}" +
         ".logo{height:60px;object-fit:contain;object-position:left center;align-self:center;max-width:280px;margin-left:0px;padding-top:6px}" +
         ".search{height:46px;border:1px solid #253550;background:linear-gradient(180deg,#0d1828,#070d1c);border-radius:9px;color:#c0d0e8;display:flex;align-items:center;padding:0 16px;gap:10px;font-size:15px}" +
@@ -155,7 +155,7 @@ public class MainActivity extends Activity {
         ".sw{height:46px;border:1px solid #253550;background:linear-gradient(180deg,#0d1828,#070d1c);border-radius:9px;color:#eaf0ff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;gap:2px;padding:0 4px}" +
         ".cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;min-height:0}" +
         ".card{position:relative;overflow:hidden;border:1px solid #2a3e68;border-radius:12px;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;cursor:pointer;height:100%}" +
-        ".card .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:0;opacity:1}" +
+        ".card .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;background:#000;z-index:0;opacity:1}" +
         ".card .grad{position:absolute;inset:0;z-index:1}" +
         ".live .grad{background:linear-gradient(180deg,transparent 0%,transparent 70%,rgba(0,5,20,.3) 100%)}" +
         ".movies .grad{background:linear-gradient(180deg,transparent 0%,transparent 70%,rgba(20,0,5,.3) 100%)}" +
@@ -632,7 +632,7 @@ public class MainActivity extends Activity {
         setContentView(root);
     }
 
-    private void showRadio() {
+        private void showRadio() {
         releasePlayer();
         android.webkit.WebView wv = new android.webkit.WebView(this);
         wv.getSettings().setJavaScriptEnabled(true);
