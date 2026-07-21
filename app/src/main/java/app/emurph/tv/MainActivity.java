@@ -414,6 +414,7 @@ public class MainActivity extends Activity {
             });
         }
         @JavascriptInterface public void addUser() { runOnUiThread(() -> showAddUser()); }
+        @JavascriptInterface public void showAddUser() { runOnUiThread(() -> MainActivity.this.showAddUser()); }
         @JavascriptInterface public void goHome() { runOnUiThread(() -> showHome()); }
     }
 
