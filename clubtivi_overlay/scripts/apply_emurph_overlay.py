@@ -53,7 +53,14 @@ text = text.replace(
     'description: "Open-source cross-platform IPTV player with intelligent EPG mapping, multi-provider stream failover, and remote control support."',
     'description: "EMurph TV for Android TV and Fire TV."',
 )
-text = text.replace('version: 0.4.0+5', 'version: 2.0.1+201')
+text = text.replace('version: 0.4.0+5', 'version: 2.0.2+202')
+text = text.replace('version: 2.0.1+201', 'version: 2.0.2+202')
+if '    - assets/emurph/' not in text:
+    text = text.replace(
+        '    - assets/fonts/\n',
+        '    - assets/fonts/\n    - assets/emurph/\n',
+        1,
+    )
 pubspec.write_text(text, encoding='utf-8')
 
 # Keep Live TV scoped to the selected EMurph profile instead of merging users.

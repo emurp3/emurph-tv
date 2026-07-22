@@ -1,10 +1,14 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../data/datasources/local/database.dart' as db;
+import '../../data/datasources/remote/xtream_client.dart';
 import '../providers/provider_manager.dart';
 
 class EmurphUsersScreen extends ConsumerStatefulWidget {
@@ -15,16 +19,16 @@ class EmurphUsersScreen extends ConsumerStatefulWidget {
 }
 
 class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
-  static const double _artWidth = 1001;
-  static const double _artHeight = 1536;
+  static const double _artWidth = 321;
+  static const double _artHeight = 585;
+  static const String _activeProviderKey = 'emurph_active_provider';
+  static const String _defaultServerUrl = 'http://limited-name.com:80';
 
-  final _scrollController = ScrollController();
   final _profileController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _serverController = TextEditingController(
-    text: 'http://limited-name.com:80',
-  );
+  final _serverController = TextEditingController(text: _defaultServerUrl);
+  final _profileFocusNode = FocusNode();
 
   List<db.Provider> _providers = const [];
   String? _activeProviderId;
@@ -40,17 +44,17 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _profileController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _serverController.dispose();
+    _profileFocusNode.dispose();
     super.dispose();
   }
 
   Future<void> _loadProviders() async {
     final prefs = await SharedPreferences.getInstance();
-    final activeId = prefs.getString('emurph_active_provider');
+    final activeId = prefs.getString(_activeProviderKey);
     final providers = await ref.read(databaseProvider).getAllProviders();
     providers.sort((a, b) {
       if (a.id == activeId) return -1;
@@ -67,7 +71,7 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
 
   Future<void> _activateProvider(db.Provider provider) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('emurph_active_provider', provider.id);
+    await prefs.setString(_activeProviderKey, provider.id);
     if (!mounted) return;
     context.go('/home');
   }
@@ -78,19 +82,38 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
     final password = _passwordController.text;
     var server = _serverController.text.trim();
 
-    if (profile.isEmpty || username.isEmpty || password.isEmpty || server.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Complete all four login fields.')),
-      );
+    if (profile.isEmpty ||
+        username.isEmpty ||
+        password.isEmpty ||
+        server.isEmpty) {
+      _message('Complete all four login fields.');
       return;
     }
 
     while (server.endsWith('/')) {
       server = server.substring(0, server.length - 1);
     }
+    if (!server.startsWith('http://') && !server.startsWith('https://')) {
+      _message('Server URL must begin with http:// or https://.');
+      return;
+    }
 
     setState(() => _saving = true);
     try {
+      final client = XtreamClient(
+        baseUrl: server,
+        username: username,
+        password: password,
+      );
+      try {
+        final info = await client.authenticate();
+        if (!info.isActive) {
+          throw Exception('The Xtream account is not active.');
+        }
+      } finally {
+        client.dispose();
+      }
+
       final id = const Uuid().v4();
       await ref.read(providerManagerProvider).addXtreamProvider(
             id: id,
@@ -100,179 +123,196 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
             password: password,
           );
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('emurph_active_provider', id);
+      await prefs.setString(_activeProviderKey, id);
       if (!mounted) return;
       context.go('/home');
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unable to add user: $error')),
-      );
+      _message('Unable to add user: $error');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
   void _scrollToForm() {
-    _scrollController.animateTo(
-      770,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
-    );
+    _profileFocusNode.requestFocus();
+  }
+
+  void _scrollToUsers() {
+    FocusScope.of(context).previousFocus();
   }
 
   void _showVpnNotice() {
+    _message('Connect VPN will open the configured VPN app when linked.');
+  }
+
+  void _message(String text) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Connect VPN will open the configured VPN app when linked.'),
-      ),
+      SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final scale = constraints.maxWidth / _artWidth;
-          final scaledHeight = _artHeight * scale;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go('/home');
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final scale = math.min(
+              constraints.maxWidth / _artWidth,
+              constraints.maxHeight / _artHeight,
+            );
+            final scaledWidth = _artWidth * scale;
+            final scaledHeight = _artHeight * scale;
+            final dx = (constraints.maxWidth - scaledWidth) / 2;
+            final dy = (constraints.maxHeight - scaledHeight) / 2;
 
-          return FocusTraversalGroup(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: SizedBox(
-                width: constraints.maxWidth,
-                height: scaledHeight,
-                child: Transform.scale(
-                  scale: scale,
-                  alignment: Alignment.topLeft,
-                  child: SizedBox(
-                    width: _artWidth,
-                    height: _artHeight,
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          child: Image.asset(
-                            'assets/emurph/users_exact.jpg',
-                            fit: BoxFit.fill,
-                            filterQuality: FilterQuality.high,
+            return FocusTraversalGroup(
+              policy: OrderedTraversalPolicy(),
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: dx,
+                    top: dy,
+                    width: scaledWidth,
+                    height: scaledHeight,
+                    child: Transform.scale(
+                    scale: scale,
+                    alignment: Alignment.topLeft,
+                      child: SizedBox(
+                        width: _artWidth,
+                        height: _artHeight,
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: Image.asset(
+                                'assets/emurph/users_exact.webp',
+                                fit: BoxFit.cover,
+                                alignment: Alignment.center,
+                                filterQuality: FilterQuality.high,
+                              ),
+                            ),
+                          _ArtHotspot(
+                            left: 208,
+                            top: 47,
+                            width: 95,
+                            height: 27,
+                            order: 1,
+                            label: 'Add User',
+                            autofocus: true,
+                            onPressed: _scrollToForm,
                           ),
-                        ),
-
-                        // Top Add User button scrolls directly to the form.
-                        _ArtHotspot(
-                          left: 737,
-                          top: 239,
-                          width: 205,
-                          height: 70,
-                          label: 'Add User',
-                          autofocus: true,
-                          onPressed: _scrollToForm,
-                        ),
-
-                        ..._buildProfileCards(),
-
-                        // Cover only the printed placeholder words, preserving
-                        // the exact borders, icons, glows and microphone artwork.
-                        _field(
-                          controller: _profileController,
-                          top: 920,
-                          label: 'Profile Name',
-                          textInputAction: TextInputAction.next,
-                        ),
-                        _field(
-                          controller: _usernameController,
-                          top: 994,
-                          label: 'Username',
-                          textInputAction: TextInputAction.next,
-                        ),
-                        _field(
-                          controller: _passwordController,
-                          top: 1068,
-                          label: 'Password',
-                          obscureText: _obscurePassword,
-                          textInputAction: TextInputAction.next,
-                          suffix: IconButton(
+                          ..._buildProfileCards(),
+                          _field(
+                            controller: _profileController,
+                            focusNode: _profileFocusNode,
+                            top: 306,
+                            label: 'Profile Name',
+                            textInputAction: TextInputAction.next,
+                            order: 20,
+                          ),
+                          _field(
+                            controller: _usernameController,
+                            top: 344,
+                            label: 'Username',
+                            textInputAction: TextInputAction.next,
+                            order: 21,
+                          ),
+                          _field(
+                            controller: _passwordController,
+                            top: 381,
+                            label: 'Password',
+                            obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.next,
+                            order: 22,
+                          ),
+                          _ArtHotspot(
+                            left: 276,
+                            top: 382,
+                            width: 27,
+                            height: 31,
+                            order: 23,
+                            label: _obscurePassword
+                                ? 'Show password'
+                                : 'Hide password',
                             onPressed: () => setState(
                               () => _obscurePassword = !_obscurePassword,
                             ),
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: Colors.white70,
-                            ),
                           ),
-                        ),
-                        _field(
-                          controller: _serverController,
-                          top: 1141,
-                          label: 'Server URL',
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => _addUser(),
-                        ),
-
-                        _ArtHotspot(
-                          left: 371,
-                          top: 1220,
-                          width: 549,
-                          height: 68,
-                          label: 'Submit Add User',
-                          onPressed: _saving ? () {} : _addUser,
-                          child: _saving
-                              ? const Center(
-                                  child: SizedBox(
-                                    width: 34,
-                                    height: 34,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 4,
-                                      color: Colors.white,
+                          _field(
+                            controller: _serverController,
+                            top: 420,
+                            label: 'Server URL',
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _addUser(),
+                            order: 24,
+                          ),
+                          _ArtHotspot(
+                            left: 100,
+                            top: 458,
+                            width: 203,
+                            height: 32,
+                            order: 25,
+                            label: 'Submit Add User',
+                            onPressed: _saving ? () {} : _addUser,
+                            child: _saving
+                                ? const Center(
+                                    child: SizedBox(
+                                      width: 34,
+                                      height: 34,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 4,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                )
-                              : null,
-                        ),
-                        _ArtHotspot(
-                          left: 129,
-                          top: 1313,
-                          width: 338,
-                          height: 68,
-                          label: 'List Users',
-                          onPressed: () => _scrollController.animateTo(
-                            0,
-                            duration: const Duration(milliseconds: 350),
-                            curve: Curves.easeOutCubic,
+                                  )
+                                : null,
                           ),
-                        ),
-                        _ArtHotspot(
-                          left: 520,
-                          top: 1313,
-                          width: 341,
-                          height: 68,
-                          label: 'Connect VPN',
-                          onPressed: _showVpnNotice,
-                        ),
-
-                        if (_loading)
-                          const Positioned(
-                            left: 0,
-                            right: 0,
-                            top: 430,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF4BBFFF),
+                          _ArtHotspot(
+                            left: 18,
+                            top: 507,
+                            width: 137,
+                            height: 36,
+                            order: 26,
+                            label: 'List Users',
+                            onPressed: _scrollToUsers,
+                          ),
+                          _ArtHotspot(
+                            left: 172,
+                            top: 507,
+                            width: 131,
+                            height: 36,
+                            order: 27,
+                            label: 'Connect VPN',
+                            onPressed: _showVpnNotice,
+                          ),
+                          if (_loading)
+                            const Positioned(
+                              left: 0,
+                              right: 0,
+                              top: 130,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: Color(0xFF4BBFFF),
+                                ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -282,94 +322,36 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
     final visible = _providers.take(2).toList();
 
     for (var index = 0; index < 2; index++) {
-      final left = index == 0 ? 67.0 : 505.0;
+      final left = index == 0 ? 10.0 : 165.0;
       final provider = index < visible.length ? visible[index] : null;
 
       widgets.add(
         _ArtHotspot(
           left: left,
-          top: 352,
-          width: 425,
-          height: 220,
+          top: 87,
+          width: 145,
+          height: 102,
+          order: 10 + index.toDouble(),
           label: provider == null ? 'Empty user slot' : provider.name,
-          onPressed: provider == null ? _scrollToForm : () => _activateProvider(provider),
+          onPressed:
+              provider == null ? _scrollToForm : () => _activateProvider(provider),
         ),
       );
 
-      widgets.add(
-        Positioned(
-          left: left + 142,
-          top: 405,
-          width: 245,
-          height: 125,
-          child: Container(
-            color: const Color(0xEF0A1020),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: provider == null
-                ? const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Add User',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      SizedBox(height: 9),
-                      Text(
-                        'Select this card to add another profile',
-                        style: TextStyle(color: Colors.white60, fontSize: 15),
-                      ),
-                    ],
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              provider.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 25,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          if (provider.id == _activeProviderId)
-                            const Icon(
-                              Icons.check_circle,
-                              color: Colors.white,
-                              size: 25,
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Username: ${provider.username ?? ''}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.white70, fontSize: 15),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Server: ${provider.url ?? ''}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.white70, fontSize: 15),
-                      ),
-                    ],
-                  ),
+      if (provider != null) {
+        widgets.add(
+          Positioned(
+            left: left + 58,
+            top: 112,
+            width: 82,
+            height: 54,
+            child: _ProfileText(
+              provider: provider,
+              active: provider.id == _activeProviderId,
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
 
     return widgets;
@@ -379,40 +361,105 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
     required TextEditingController controller,
     required double top,
     required String label,
+    required double order,
+    FocusNode? focusNode,
     bool obscureText = false,
     TextInputAction? textInputAction,
     ValueChanged<String>? onSubmitted,
-    Widget? suffix,
   }) {
     return Positioned(
-      left: 453,
+      left: 100,
       top: top,
-      width: 454,
-      height: 62,
-      child: TextField(
-        controller: controller,
-        obscureText: obscureText,
-        textInputAction: textInputAction,
-        onSubmitted: onSubmitted,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 21,
-          fontWeight: FontWeight.w500,
-        ),
-        decoration: InputDecoration(
-          hintText: label,
-          hintStyle: const TextStyle(color: Colors.white54, fontSize: 21),
-          filled: true,
-          fillColor: const Color(0xE80B1123),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFF55C8FF), width: 2),
-            borderRadius: BorderRadius.all(Radius.circular(8)),
+      width: 203,
+      height: 32,
+      child: FocusTraversalOrder(
+        order: NumericFocusOrder(order),
+        child: Semantics(
+          textField: true,
+          label: label,
+          child: TextField(
+            controller: controller,
+            focusNode: focusNode,
+            obscureText: obscureText,
+            textInputAction: textInputAction,
+            onSubmitted: onSubmitted,
+            cursorColor: Colors.white,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 9,
+              fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  color: Colors.black87,
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+            decoration: const InputDecoration(
+              filled: false,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(horizontal: 34, vertical: 9),
+            ),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 17),
-          suffixIcon: suffix,
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileText extends StatelessWidget {
+  final db.Provider provider;
+  final bool active;
+
+  const _ProfileText({
+    required this.provider,
+    required this.active,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            active ? '${provider.name}  Active' : provider.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              shadows: [Shadow(color: Colors.black, blurRadius: 8)],
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            provider.username ?? '',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 6,
+              shadows: [Shadow(color: Colors.black, blurRadius: 6)],
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            provider.url ?? '',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 6,
+              shadows: [Shadow(color: Colors.black, blurRadius: 6)],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -423,6 +470,7 @@ class _ArtHotspot extends StatefulWidget {
   final double top;
   final double width;
   final double height;
+  final double order;
   final String label;
   final VoidCallback onPressed;
   final bool autofocus;
@@ -433,6 +481,7 @@ class _ArtHotspot extends StatefulWidget {
     required this.top,
     required this.width,
     required this.height,
+    required this.order,
     required this.label,
     required this.onPressed,
     this.autofocus = false,
@@ -446,6 +495,19 @@ class _ArtHotspot extends StatefulWidget {
 class _ArtHotspotState extends State<_ArtHotspot> {
   bool _focused = false;
 
+  KeyEventResult _handleKey(KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.select ||
+        key == LogicalKeyboardKey.enter ||
+        key == LogicalKeyboardKey.space ||
+        key == LogicalKeyboardKey.gameButtonA) {
+      widget.onPressed();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Positioned(
@@ -453,17 +515,18 @@ class _ArtHotspotState extends State<_ArtHotspot> {
       top: widget.top,
       width: widget.width,
       height: widget.height,
-      child: Focus(
-        autofocus: widget.autofocus,
-        onFocusChange: (value) => setState(() => _focused = value),
-        child: Semantics(
-          button: true,
-          label: widget.label,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
+      child: FocusTraversalOrder(
+        order: NumericFocusOrder(widget.order),
+        child: Focus(
+          autofocus: widget.autofocus,
+          onKeyEvent: (_, event) => _handleKey(event),
+          onFocusChange: (value) => setState(() => _focused = value),
+          child: Semantics(
+            button: true,
+            label: widget.label,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: widget.onPressed,
-              borderRadius: BorderRadius.circular(14),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 120),
                 decoration: BoxDecoration(

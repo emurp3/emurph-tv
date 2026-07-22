@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -29,15 +29,18 @@ jobs:
 
       - name: Expand EMurph dashboard overlay
         run: |
-          mkdir -p clubtivi_overlay/decoded
+          mkdir -p clubtivi_overlay/decoded clubtivi_overlay/staged
           cat clubtivi_overlay/chunks/overlay.part.* > /tmp/emurph-overlay.b64
           test "$(wc -c < /tmp/emurph-overlay.b64)" = "13456"
           base64 --decode /tmp/emurph-overlay.b64 > /tmp/emurph-overlay.tar.gz
           tar -tzf /tmp/emurph-overlay.tar.gz >/dev/null
           tar -xzf /tmp/emurph-overlay.tar.gz -C clubtivi_overlay/decoded
+          python3 clubtivi_overlay/scripts/materialize_exact_assets.py clubtivi_overlay
+          cp -a clubtivi_overlay/decoded/clubtivi/. clubtivi_overlay/staged/clubtivi/
+          cp -a clubtivi_overlay/files/. clubtivi_overlay/staged/clubtivi/
 
       - name: Apply EMurph dashboard and IPTV integration
-        run: python3 clubtivi_overlay/scripts/apply_emurph_overlay.py clubtivi-src clubtivi_overlay/decoded/clubtivi
+        run: python3 clubtivi_overlay/scripts/apply_emurph_overlay.py clubtivi-src clubtivi_overlay/staged/clubtivi
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -71,8 +74,21 @@ jobs:
         shell: bash
         run: |
           if [ -f clubtivi-src/build/app/outputs/flutter-apk/app-release.apk ]; then
-            cp clubtivi-src/build/app/outputs/flutter-apk/app-release.apk EMurph-TV-ClubTivi.apk
+            cp clubtivi-src/build/app/outputs/flutter-apk/app-release.apk EMurph-TV-2.0.2-Exact-Manus-UI.apk
           fi
+
+      - name: Verify APK identity and native ABIs
+        if: hashFiles('EMurph-TV-2.0.2-Exact-Manus-UI.apk') != ''
+        shell: bash
+        run: |
+          AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)"
+          test -n "$AAPT"
+          "$AAPT" dump badging EMurph-TV-2.0.2-Exact-Manus-UI.apk | tee apk-badging.txt
+          unzip -l EMurph-TV-2.0.2-Exact-Manus-UI.apk | tee apk-list.txt
+          grep "package: name='app.emurph.tv.engine'" apk-badging.txt
+          grep "launchable-activity: name='io.github.clubanderson.clubtivi.MainActivity'" apk-badging.txt
+          grep 'lib/arm64-v8a/' apk-list.txt
+          grep 'lib/armeabi-v7a/' apk-list.txt
 
       - name: Upload build diagnostics
         if: always()
@@ -84,15 +100,17 @@ jobs:
             flutter-analyze.exit
             flutter-build.log
             flutter-build.exit
+            apk-badging.txt
+            apk-list.txt
           if-no-files-found: warn
           retention-days: 14
 
       - name: Upload APK artifact
-        if: hashFiles('EMurph-TV-ClubTivi.apk') != ''
+        if: hashFiles('EMurph-TV-2.0.2-Exact-Manus-UI.apk') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: EMurph-TV-ClubTivi
-          path: EMurph-TV-ClubTivi.apk
+          name: EMurph-TV-2.0.2-Exact-Manus-UI
+          path: EMurph-TV-2.0.2-Exact-Manus-UI.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -102,15 +120,4 @@ jobs:
           echo "Flutter analyze exit: $(cat flutter-analyze.exit)"
           echo "Flutter build exit: $(cat flutter-build.exit)"
           test "$(cat flutter-build.exit)" = "0"
-          test -f EMurph-TV-ClubTivi.apk
-
-      - name: Publish EMurph TV engine build
-        if: github.event_name != 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release view v2.0.0-engine1 >/dev/null 2>&1 || \
-            gh release create v2.0.0-engine1 \
-              --title "EMurph TV 2.0 — clubTivi Engine" \
-              --notes "Real Android TV/Fire TV IPTV engine with the EMurph dashboard, Xtream Live TV, provider VOD, provider Series, EPG-capable playback, user profiles, and EMurph Radio."
-          gh release upload v2.0.0-engine1 EMurph-TV-ClubTivi.apk --clobber
+          test -f EMurph-TV-2.0.2-Exact-Manus-UI.apk

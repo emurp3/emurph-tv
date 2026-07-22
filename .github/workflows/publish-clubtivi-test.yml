@@ -1,44 +1,16 @@
-name: Publish EMurph TV 2.0.1 Fixed APK
+name: Publish EMurph TV Exact UI APK
 
 on:
-  push:
-    branches: [build/clubtivi-engine]
-    paths:
-      - '.github/workflows/publish-clubtivi-test.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - '.github/workflows/publish-clubtivi-test.yml'
   workflow_dispatch:
 
 permissions:
-  actions: read
-  contents: write
+  contents: read
 
 jobs:
-  publish:
+  blocked-until-visual-validation:
     runs-on: ubuntu-latest
     steps:
-      - name: Download verified corrected APK artifact
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Explain validation gate
         run: |
-          gh run download 29915972071 \
-            --repo emurp3/emurph-tv \
-            --name EMurph-TV-ClubTivi \
-            --dir verified-apk
-          test -f verified-apk/EMurph-TV-ClubTivi.apk
-          cp verified-apk/EMurph-TV-ClubTivi.apk verified-apk/EMurph-TV-2.0.1-fixed.apk
-
-      - name: Publish corrected Fire TV test release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release view v2.0.1-fixed --repo emurp3/emurph-tv >/dev/null 2>&1 || \
-            gh release create v2.0.1-fixed \
-              --repo emurp3/emurph-tv \
-              --title "EMurph TV 2.0.1 — Startup Fix" \
-              --notes "Corrected clubTivi-based Android TV/Fire TV test build. Fixes the startup crash caused by the Android namespace and launch activity mismatch. This does not replace the current public production app."
-          gh release upload v2.0.1-fixed \
-            verified-apk/EMurph-TV-2.0.1-fixed.apk \
-            --repo emurp3/emurph-tv
+          echo "Publishing is intentionally disabled."
+          echo "Capture and compare Firestick Home and Add User screenshots before creating a release or Downloader code."
