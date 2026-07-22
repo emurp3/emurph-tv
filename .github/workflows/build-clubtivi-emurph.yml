@@ -48,22 +48,58 @@ jobs:
 
       - name: Analyze integrated application
         working-directory: clubtivi-src
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        shell: bash
+        run: |
+          set +e
+          flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee ../flutter-analyze.log
+          echo "${PIPESTATUS[0]}" > ../flutter-analyze.exit
+          exit 0
 
       - name: Build Android TV and Fire TV APK
         working-directory: clubtivi-src
-        run: flutter build apk --release
+        shell: bash
+        run: |
+          set +e
+          flutter build apk --release 2>&1 | tee ../flutter-build.log
+          echo "${PIPESTATUS[0]}" > ../flutter-build.exit
+          exit 0
 
-      - name: Prepare APK
-        run: cp clubtivi-src/build/app/outputs/flutter-apk/app-release.apk EMurph-TV-ClubTivi.apk
+      - name: Prepare APK when build succeeds
+        shell: bash
+        run: |
+          if [ -f clubtivi-src/build/app/outputs/flutter-apk/app-release.apk ]; then
+            cp clubtivi-src/build/app/outputs/flutter-apk/app-release.apk EMurph-TV-ClubTivi.apk
+          fi
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: EMurph-TV-ClubTivi-diagnostics
+          path: |
+            flutter-analyze.log
+            flutter-analyze.exit
+            flutter-build.log
+            flutter-build.exit
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Upload APK artifact
+        if: hashFiles('EMurph-TV-ClubTivi.apk') != ''
         uses: actions/upload-artifact@v4
         with:
           name: EMurph-TV-ClubTivi
           path: EMurph-TV-ClubTivi.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Verify real APK build
+        shell: bash
+        run: |
+          echo "Flutter analyze exit: $(cat flutter-analyze.exit)"
+          echo "Flutter build exit: $(cat flutter-build.exit)"
+          test "$(cat flutter-build.exit)" = "0"
+          test -f EMurph-TV-ClubTivi.apk
 
       - name: Publish EMurph TV engine build
         if: github.event_name != 'pull_request'
