@@ -6,6 +6,8 @@ on:
     paths:
       - 'clubtivi_overlay/**'
       - '.github/workflows/build-clubtivi-emurph.yml'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
