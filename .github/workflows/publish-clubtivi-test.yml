@@ -28,6 +28,7 @@ jobs:
             --name EMurph-TV-ClubTivi \
             --dir verified-apk
           test -f verified-apk/EMurph-TV-ClubTivi.apk
+          cp verified-apk/EMurph-TV-ClubTivi.apk verified-apk/EMurph-TV-ClubTivi-v2.apk
 
       - name: Publish isolated Fire TV test release
         env:
@@ -39,6 +40,5 @@ jobs:
               --title "EMurph TV 2.0 — clubTivi Engine Test" \
               --notes "Real clubTivi-based Android TV/Fire TV engine test build. This does not replace the current public EMurph TV release."
           gh release upload v2.0.0-engine1 \
-            verified-apk/EMurph-TV-ClubTivi.apk \
-            --repo emurp3/emurph-tv \
-            --clobber
+            verified-apk/EMurph-TV-ClubTivi-v2.apk \
+            --repo emurp3/emurph-tv
