@@ -4,6 +4,7 @@ import '../data/models/show.dart';
 import '../features/channels/channels_screen.dart';
 import '../features/emurph/emurph_catalog_screen.dart';
 import '../features/emurph/emurph_home_screen.dart';
+import '../features/emurph/emurph_users_screen.dart';
 import '../features/epg_mapping/epg_mapping_screen.dart';
 import '../features/guide/guide_screen.dart';
 import '../features/player/player_screen.dart';
@@ -26,6 +27,10 @@ GoRouter createRouter() {
       GoRoute(
         path: '/home',
         builder: (context, state) => const EmurphHomeScreen(),
+      ),
+      GoRoute(
+        path: '/users',
+        builder: (context, state) => const EmurphUsersScreen(),
       ),
       GoRoute(
         path: '/live',
