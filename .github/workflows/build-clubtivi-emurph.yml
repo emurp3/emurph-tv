@@ -1,0 +1,75 @@
+name: Build EMurph TV clubTivi Engine
+
+on:
+  push:
+    branches: [build/clubtivi-engine]
+    paths:
+      - 'clubtivi_overlay/**'
+      - '.github/workflows/build-clubtivi-emurph.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout EMurph TV integration
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned clubTivi engine
+        run: |
+          git clone https://github.com/clubanderson/clubTivi.git clubtivi-src
+          cd clubtivi-src
+          git checkout ac690553a7aba33e8f91db653e1ac74e74a9e3b4
+
+      - name: Expand EMurph dashboard overlay
+        run: |
+          mkdir -p clubtivi_overlay/decoded
+          base64 --decode clubtivi_overlay/overlay.tar.gz.b64 > /tmp/emurph-overlay.tar.gz
+          tar -xzf /tmp/emurph-overlay.tar.gz -C clubtivi_overlay/decoded
+
+      - name: Apply EMurph dashboard and IPTV integration
+        run: python3 clubtivi_overlay/scripts/apply_emurph_overlay.py clubtivi-src clubtivi_overlay/decoded
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve Flutter dependencies
+        working-directory: clubtivi-src
+        run: flutter pub get
+
+      - name: Analyze integrated application
+        working-directory: clubtivi-src
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Build Android TV and Fire TV APK
+        working-directory: clubtivi-src
+        run: flutter build apk --release
+
+      - name: Prepare APK
+        run: cp clubtivi-src/build/app/outputs/flutter-apk/app-release.apk EMurph-TV-ClubTivi.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EMurph-TV-ClubTivi
+          path: EMurph-TV-ClubTivi.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish EMurph TV engine build
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v2.0.0-engine1 >/dev/null 2>&1 || \
+            gh release create v2.0.0-engine1 \
+              --title "EMurph TV 2.0 — clubTivi Engine" \
+              --notes "Real Android TV/Fire TV IPTV engine with the EMurph dashboard, Xtream Live TV, provider VOD, provider Series, EPG-capable playback, user profiles, and EMurph Radio."
+          gh release upload v2.0.0-engine1 EMurph-TV-ClubTivi.apk --clobber
