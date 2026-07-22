@@ -23,15 +23,20 @@ for src in overlay.rglob('*'):
     shutil.copy2(src, dst)
     print(f'overlay: {rel}')
 
-# Rebrand package and version while keeping this install separate from the old Java build.
+# Use a separate application ID, but preserve clubTivi's Android namespace.
+# MainActivity remains in io.github.clubanderson.clubtivi; changing the namespace
+# without moving that class causes an immediate ClassNotFoundException at launch.
 gradle = root / 'android/app/build.gradle.kts'
 text = gradle.read_text(encoding='utf-8')
-text = text.replace('io.github.clubanderson.clubtivi', 'app.emurph.tv.engine')
+text = text.replace(
+    'applicationId = "io.github.clubanderson.clubtivi"',
+    'applicationId = "app.emurph.tv.engine"',
+)
 gradle.write_text(text, encoding='utf-8')
 
 manifest = root / 'android/app/src/main/AndroidManifest.xml'
 text = manifest.read_text(encoding='utf-8')
-text = text.replace('android:label="clubTivi"', 'android:label="EMurph TV"')
+text = text.replace('android:label="clubTivi"', 'android:label="EMurph TV 2"')
 text = text.replace('android:icon="@mipmap/ic_launcher"', 'android:icon="@drawable/app_icon"')
 text = text.replace('android:banner="@mipmap/ic_launcher"', 'android:banner="@drawable/app_icon"')
 if 'android:usesCleartextTraffic=' not in text:
@@ -48,7 +53,7 @@ text = text.replace(
     'description: "Open-source cross-platform IPTV player with intelligent EPG mapping, multi-provider stream failover, and remote control support."',
     'description: "EMurph TV for Android TV and Fire TV."',
 )
-text = text.replace('version: 0.4.0+5', 'version: 2.0.0+200')
+text = text.replace('version: 0.4.0+5', 'version: 2.0.1+201')
 pubspec.write_text(text, encoding='utf-8')
 
 # Keep Live TV scoped to the selected EMurph profile instead of merging users.
