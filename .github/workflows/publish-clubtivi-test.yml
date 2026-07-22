@@ -1,4 +1,4 @@
-name: Publish EMurph TV clubTivi Test APK
+name: Publish EMurph TV 2.0.1 Fixed APK
 
 on:
   push:
@@ -19,26 +19,26 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Download verified APK artifact
+      - name: Download verified corrected APK artifact
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh run download 29897518102 \
+          gh run download 29915972071 \
             --repo emurp3/emurph-tv \
             --name EMurph-TV-ClubTivi \
             --dir verified-apk
           test -f verified-apk/EMurph-TV-ClubTivi.apk
-          cp verified-apk/EMurph-TV-ClubTivi.apk verified-apk/EMurph-TV-ClubTivi-v2.apk
+          cp verified-apk/EMurph-TV-ClubTivi.apk verified-apk/EMurph-TV-2.0.1-fixed.apk
 
-      - name: Publish isolated Fire TV test release
+      - name: Publish corrected Fire TV test release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view v2.0.0-engine1 --repo emurp3/emurph-tv >/dev/null 2>&1 || \
-            gh release create v2.0.0-engine1 \
+          gh release view v2.0.1-fixed --repo emurp3/emurph-tv >/dev/null 2>&1 || \
+            gh release create v2.0.1-fixed \
               --repo emurp3/emurph-tv \
-              --title "EMurph TV 2.0 — clubTivi Engine Test" \
-              --notes "Real clubTivi-based Android TV/Fire TV engine test build. This does not replace the current public EMurph TV release."
-          gh release upload v2.0.0-engine1 \
-            verified-apk/EMurph-TV-ClubTivi-v2.apk \
+              --title "EMurph TV 2.0.1 — Startup Fix" \
+              --notes "Corrected clubTivi-based Android TV/Fire TV test build. Fixes the startup crash caused by the Android namespace and launch activity mismatch. This does not replace the current public production app."
+          gh release upload v2.0.1-fixed \
+            verified-apk/EMurph-TV-2.0.1-fixed.apk \
             --repo emurp3/emurph-tv
