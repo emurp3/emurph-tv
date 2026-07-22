@@ -30,11 +30,14 @@ jobs:
       - name: Expand EMurph dashboard overlay
         run: |
           mkdir -p clubtivi_overlay/decoded
-          base64 --decode clubtivi_overlay/overlay.tar.gz.b64 > /tmp/emurph-overlay.tar.gz
+          cat clubtivi_overlay/chunks/overlay.part.* > /tmp/emurph-overlay.b64
+          test "$(wc -c < /tmp/emurph-overlay.b64)" = "13456"
+          base64 --decode /tmp/emurph-overlay.b64 > /tmp/emurph-overlay.tar.gz
+          tar -tzf /tmp/emurph-overlay.tar.gz >/dev/null
           tar -xzf /tmp/emurph-overlay.tar.gz -C clubtivi_overlay/decoded
 
       - name: Apply EMurph dashboard and IPTV integration
-        run: python3 clubtivi_overlay/scripts/apply_emurph_overlay.py clubtivi-src clubtivi_overlay/decoded
+        run: python3 clubtivi_overlay/scripts/apply_emurph_overlay.py clubtivi-src clubtivi_overlay/decoded/clubtivi
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
