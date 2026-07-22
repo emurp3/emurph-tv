@@ -7,10 +7,12 @@ if len(sys.argv) != 3:
     raise SystemExit('usage: apply_emurph_overlay.py <clubtivi-root> <overlay-root>')
 
 root = Path(sys.argv[1]).resolve()
-overlay = Path(sys.argv[2]).resolve() / 'clubtivi'
+overlay = Path(sys.argv[2]).resolve()
 
 if not (root / 'pubspec.yaml').exists():
     raise SystemExit(f'clubTivi root not found: {root}')
+if not overlay.exists():
+    raise SystemExit(f'EMurph overlay not found: {overlay}')
 
 for src in overlay.rglob('*'):
     if src.is_dir():
