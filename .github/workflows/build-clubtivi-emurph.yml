@@ -1,0 +1,123 @@
+name: Build EMurph TV clubTivi Engine
+
+on:
+  push:
+    branches: [build/clubtivi-engine]
+    paths:
+      - 'clubtivi_overlay/**'
+      - '.github/workflows/build-clubtivi-emurph.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout EMurph TV integration
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned clubTivi engine
+        run: |
+          git clone https://github.com/clubanderson/clubTivi.git clubtivi-src
+          cd clubtivi-src
+          git checkout ac690553a7aba33e8f91db653e1ac74e74a9e3b4
+
+      - name: Expand EMurph dashboard overlay
+        run: |
+          mkdir -p clubtivi_overlay/decoded clubtivi_overlay/staged
+          cat clubtivi_overlay/chunks/overlay.part.* > /tmp/emurph-overlay.b64
+          test "$(wc -c < /tmp/emurph-overlay.b64)" = "13456"
+          base64 --decode /tmp/emurph-overlay.b64 > /tmp/emurph-overlay.tar.gz
+          tar -tzf /tmp/emurph-overlay.tar.gz >/dev/null
+          tar -xzf /tmp/emurph-overlay.tar.gz -C clubtivi_overlay/decoded
+          python3 clubtivi_overlay/scripts/materialize_exact_assets.py clubtivi_overlay
+          cp -a clubtivi_overlay/decoded/clubtivi/. clubtivi_overlay/staged/clubtivi/
+          cp -a clubtivi_overlay/files/. clubtivi_overlay/staged/clubtivi/
+
+      - name: Apply EMurph dashboard and IPTV integration
+        run: python3 clubtivi_overlay/scripts/apply_emurph_overlay.py clubtivi-src clubtivi_overlay/staged/clubtivi
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve Flutter dependencies
+        working-directory: clubtivi-src
+        run: flutter pub get
+
+      - name: Analyze integrated application
+        working-directory: clubtivi-src
+        shell: bash
+        run: |
+          set +e
+          flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee ../flutter-analyze.log
+          echo "${PIPESTATUS[0]}" > ../flutter-analyze.exit
+          exit 0
+
+      - name: Build Android TV and Fire TV APK
+        working-directory: clubtivi-src
+        shell: bash
+        run: |
+          set +e
+          flutter build apk --release 2>&1 | tee ../flutter-build.log
+          echo "${PIPESTATUS[0]}" > ../flutter-build.exit
+          exit 0
+
+      - name: Prepare APK when build succeeds
+        shell: bash
+        run: |
+          if [ -f clubtivi-src/build/app/outputs/flutter-apk/app-release.apk ]; then
+            cp clubtivi-src/build/app/outputs/flutter-apk/app-release.apk EMurph-TV-2.0.2-Exact-Manus-UI.apk
+          fi
+
+      - name: Verify APK identity and native ABIs
+        if: hashFiles('EMurph-TV-2.0.2-Exact-Manus-UI.apk') != ''
+        shell: bash
+        run: |
+          AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)"
+          test -n "$AAPT"
+          "$AAPT" dump badging EMurph-TV-2.0.2-Exact-Manus-UI.apk | tee apk-badging.txt
+          unzip -l EMurph-TV-2.0.2-Exact-Manus-UI.apk | tee apk-list.txt
+          grep "package: name='app.emurph.tv.engine'" apk-badging.txt
+          grep "launchable-activity: name='io.github.clubanderson.clubtivi.MainActivity'" apk-badging.txt
+          grep 'lib/arm64-v8a/' apk-list.txt
+          grep 'lib/armeabi-v7a/' apk-list.txt
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: EMurph-TV-ClubTivi-diagnostics
+          path: |
+            flutter-analyze.log
+            flutter-analyze.exit
+            flutter-build.log
+            flutter-build.exit
+            apk-badging.txt
+            apk-list.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload APK artifact
+        if: hashFiles('EMurph-TV-2.0.2-Exact-Manus-UI.apk') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: EMurph-TV-2.0.2-Exact-Manus-UI
+          path: EMurph-TV-2.0.2-Exact-Manus-UI.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Verify real APK build
+        shell: bash
+        run: |
+          echo "Flutter analyze exit: $(cat flutter-analyze.exit)"
+          echo "Flutter build exit: $(cat flutter-build.exit)"
+          test "$(cat flutter-build.exit)" = "0"
+          test -f EMurph-TV-2.0.2-Exact-Manus-UI.apk
