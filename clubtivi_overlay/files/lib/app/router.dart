@@ -9,7 +9,6 @@ import '../features/emurph/emurph_users_screen.dart';
 import '../features/epg_mapping/epg_mapping_screen.dart';
 import '../features/guide/guide_screen.dart';
 import '../features/player/player_screen.dart';
-import '../features/providers/providers_screen.dart';
 import '../features/settings/debrid_services_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/shows/show_detail_screen.dart';
@@ -59,7 +58,9 @@ GoRouter createRouter() {
       ),
       GoRoute(
         path: '/providers',
-        builder: (context, state) => const ProvidersScreen(),
+        builder: (context, state) => const EmurphUsersScreen(
+          startInAddProvider: true,
+        ),
       ),
       GoRoute(
         path: '/epg-mapping',

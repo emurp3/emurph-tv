@@ -204,6 +204,12 @@ class _EmurphHomeScreenState extends ConsumerState<EmurphHomeScreen> {
                   text: 'Logged in:  $_profileName',
                   fontSize: art.scale * 13,
                 ),
+                _Hotspot(
+                  rect: art.rect(646, 430, 139, 39),
+                  order: 14,
+                  label: 'Add IPTV provider',
+                  onPressed: () => context.push('/providers'),
+                ),
               ],
             ),
           );

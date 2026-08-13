@@ -53,9 +53,10 @@ text = text.replace(
     'description: "Open-source cross-platform IPTV player with intelligent EPG mapping, multi-provider stream failover, and remote control support."',
     'description: "EMurph TV for Android TV and Fire TV."',
 )
-text = text.replace('version: 0.4.0+5', 'version: 2.0.3+203')
-text = text.replace('version: 2.0.1+201', 'version: 2.0.3+203')
-text = text.replace('version: 2.0.2+202', 'version: 2.0.3+203')
+text = text.replace('version: 0.4.0+5', 'version: 2.0.4+204')
+text = text.replace('version: 2.0.1+201', 'version: 2.0.4+204')
+text = text.replace('version: 2.0.2+202', 'version: 2.0.4+204')
+text = text.replace('version: 2.0.3+203', 'version: 2.0.4+204')
 if '    - assets/emurph/' not in text:
     text = text.replace(
         '    - assets/fonts/\n',
@@ -234,5 +235,30 @@ text = text.replace(
     1,
 )
 channels.write_text(text, encoding='utf-8')
+
+# Movies and Series should send provider setup to the EMurph Xtream form
+# instead of leaving users on a retry-only error state.
+catalog = root / 'lib/features/emurph/emurph_catalog_screen.dart'
+text = catalog.read_text(encoding='utf-8')
+old = """                              ElevatedButton(
+                                onPressed: _load,
+                                child: const Text('Try Again'),
+                              ),
+"""
+new = """                              ElevatedButton(
+                                onPressed: _load,
+                                child: const Text('Try Again'),
+                              ),
+                              const SizedBox(height: 10),
+                              ElevatedButton.icon(
+                                onPressed: () => context.push('/providers'),
+                                icon: const Icon(Icons.add),
+                                label: const Text('Add Provider'),
+                              ),
+"""
+if old not in text:
+    raise SystemExit('EMurph catalog error button block changed upstream')
+text = text.replace(old, new, 1)
+catalog.write_text(text, encoding='utf-8')
 
 print('EMurph TV clubTivi engine overlay applied successfully.')

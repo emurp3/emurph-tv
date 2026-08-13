@@ -12,7 +12,12 @@ import '../../data/datasources/remote/xtream_client.dart';
 import '../providers/provider_manager.dart';
 
 class EmurphUsersScreen extends ConsumerStatefulWidget {
-  const EmurphUsersScreen({super.key});
+  final bool startInAddProvider;
+
+  const EmurphUsersScreen({
+    super.key,
+    this.startInAddProvider = false,
+  });
 
   @override
   ConsumerState<EmurphUsersScreen> createState() => _EmurphUsersScreenState();
@@ -41,6 +46,11 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
   void initState() {
     super.initState();
     _loadProviders();
+    if (widget.startInAddProvider) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _scrollToForm();
+      });
+    }
   }
 
   @override
@@ -183,6 +193,14 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
     _message('Connect VPN will open the configured VPN app when linked.');
   }
 
+  void _goBack() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/home');
+    }
+  }
+
   void _message(String text) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -195,7 +213,7 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) context.go('/home');
+        if (!didPop) _goBack();
       },
       child: Scaffold(
         backgroundColor: Colors.black,
