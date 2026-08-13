@@ -1,0 +1,16 @@
+name: Publish EMurph TV Exact UI APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  blocked-until-visual-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain validation gate
+        run: |
+          echo "Publishing is intentionally disabled."
+          echo "Capture and compare Firestick Home and Add User screenshots before creating a release or Downloader code."
