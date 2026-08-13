@@ -23,6 +23,7 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
   static const double _artHeight = 585;
   static const String _activeProviderKey = 'emurph_active_provider';
   static const String _defaultServerUrl = 'http://limited-name.com:80';
+  static const String _loginType = 'Xtream API Codes';
 
   final _profileController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -77,10 +78,12 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
   }
 
   Future<void> _addUser() async {
+    if (_saving) return;
+
     final profile = _profileController.text.trim();
     final username = _usernameController.text.trim();
-    final password = _passwordController.text;
-    var server = _serverController.text.trim();
+    final password = _passwordController.text.trim();
+    final server = _normalizeServerUrl(_serverController.text);
 
     if (profile.isEmpty ||
         username.isEmpty ||
@@ -90,9 +93,6 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
       return;
     }
 
-    while (server.endsWith('/')) {
-      server = server.substring(0, server.length - 1);
-    }
     if (!server.startsWith('http://') && !server.startsWith('https://')) {
       _message('Server URL must begin with http:// or https://.');
       return;
@@ -128,10 +128,47 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
       context.go('/home');
     } catch (error) {
       if (!mounted) return;
-      _message('Unable to add user: $error');
+      _message('Unable to add Xtream user: ${_friendlyError(error)}');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  String _normalizeServerUrl(String value) {
+    var server = value.trim();
+    while (server.endsWith('.') || server.endsWith('/')) {
+      server = server.substring(0, server.length - 1);
+    }
+    final apiIndex = server.toLowerCase().indexOf('/player_api.php');
+    if (apiIndex >= 0) {
+      server = server.substring(0, apiIndex);
+    }
+    while (server.endsWith('.') || server.endsWith('/')) {
+      server = server.substring(0, server.length - 1);
+    }
+    return server;
+  }
+
+  String _friendlyError(Object error) {
+    final raw = error.toString();
+    if (raw.contains('Provider limit reached')) return raw;
+    if (raw.contains('SocketException') ||
+        raw.contains('Connection') ||
+        raw.contains('timed out')) {
+      return 'could not reach the IPTV server. Check the server URL.';
+    }
+    if (raw.contains('FormatException') || raw.contains('type')) {
+      return 'the IPTV server returned an unexpected response.';
+    }
+    if (raw.contains('401') || raw.contains('403')) {
+      return 'username, password, or server URL was rejected.';
+    }
+    return raw.replaceFirst('Exception: ', '');
+  }
+
+  void _selectLoginType() {
+    _profileFocusNode.requestFocus();
+    _message('$_loginType selected. Enter name, username, password, and URL.');
   }
 
   void _scrollToForm() {
@@ -206,9 +243,40 @@ class _EmurphUsersScreenState extends ConsumerState<EmurphUsersScreen> {
                             order: 1,
                             label: 'Add User',
                             autofocus: true,
-                            onPressed: _scrollToForm,
+                            onPressed: _selectLoginType,
                           ),
                           ..._buildProfileCards(),
+                          _ArtHotspot(
+                            left: 100,
+                            top: 283,
+                            width: 203,
+                            height: 18,
+                            order: 19,
+                            label: 'Provider type $_loginType',
+                            onPressed: _selectLoginType,
+                            child: const Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 34),
+                                child: Text(
+                                  _loginType,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w700,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black,
+                                        blurRadius: 6,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                           _field(
                             controller: _profileController,
                             focusNode: _profileFocusNode,

@@ -21,7 +21,6 @@ class EmurphHomeScreen extends ConsumerStatefulWidget {
 class _EmurphHomeScreenState extends ConsumerState<EmurphHomeScreen> {
   static const double _artWidth = 815;
   static const double _artHeight = 617;
-  static const String _radioUrl = 'https://radio.emurph.com/stream';
 
   String _profileName = 'Not logged in';
   String _expiration = 'Not available';
@@ -79,17 +78,7 @@ class _EmurphHomeScreenState extends ConsumerState<EmurphHomeScreen> {
   }
 
   void _openRadio() {
-    context.push(
-      '/player',
-      extra: const {
-        'streamUrl': _radioUrl,
-        'channelName': 'EMurph Radio',
-        'channelLogo': null,
-        'alternativeUrls': <String>[],
-        'channels': <Map<String, dynamic>>[],
-        'currentIndex': 0,
-      },
-    );
+    context.push('/radio');
   }
 
   void _showNotReady(String feature) {

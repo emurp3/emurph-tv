@@ -53,8 +53,9 @@ text = text.replace(
     'description: "Open-source cross-platform IPTV player with intelligent EPG mapping, multi-provider stream failover, and remote control support."',
     'description: "EMurph TV for Android TV and Fire TV."',
 )
-text = text.replace('version: 0.4.0+5', 'version: 2.0.2+202')
-text = text.replace('version: 2.0.1+201', 'version: 2.0.2+202')
+text = text.replace('version: 0.4.0+5', 'version: 2.0.3+203')
+text = text.replace('version: 2.0.1+201', 'version: 2.0.3+203')
+text = text.replace('version: 2.0.2+202', 'version: 2.0.3+203')
 if '    - assets/emurph/' not in text:
     text = text.replace(
         '    - assets/fonts/\n',
@@ -62,6 +63,132 @@ if '    - assets/emurph/' not in text:
         1,
     )
 pubspec.write_text(text, encoding='utf-8')
+
+# Make Xtream Codes login behave with IPTV providers that return JSON as
+# text/html, string stream IDs, or player_api.php URLs copied from portals.
+xtream = root / 'lib/data/datasources/remote/xtream_client.dart'
+text = xtream.read_text(encoding='utf-8')
+text = text.replace(
+    "import 'package:dio/dio.dart';",
+    "import 'dart:convert';\n\nimport 'package:dio/dio.dart';",
+    1,
+)
+old = """  String get _apiBase => '$baseUrl/player_api.php';
+
+  Map<String, String> get _authParams => {
+        'username': username,
+        'password': password,
+      };
+"""
+new = """  String get _normalizedBaseUrl {
+    var url = baseUrl.trim();
+    if (url.endsWith('.')) {
+      url = url.substring(0, url.length - 1);
+    }
+    final apiIndex = url.toLowerCase().indexOf('/player_api.php');
+    if (apiIndex >= 0) {
+      url = url.substring(0, apiIndex);
+    }
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return url;
+  }
+
+  String get _apiBase => '$_normalizedBaseUrl/player_api.php';
+
+  Map<String, String> get _authParams => {
+        'username': username,
+        'password': password,
+      };
+
+  dynamic _json(Response<dynamic> response) {
+    final data = response.data;
+    if (data is String) {
+      final trimmed = data.trim();
+      if (trimmed.isEmpty) return <String, dynamic>{};
+      return jsonDecode(trimmed);
+    }
+    return data;
+  }
+
+  Map<String, dynamic> _jsonMap(Response<dynamic> response) =>
+      Map<String, dynamic>.from(_json(response) as Map);
+
+  List<dynamic> _jsonList(Response<dynamic> response) =>
+      List<dynamic>.from(_json(response) as List);
+
+  Map<String, dynamic> _entryMap(dynamic value) =>
+      Map<String, dynamic>.from(value as Map);
+
+  int _streamId(dynamic value) =>
+      value is int ? value : int.tryParse(value?.toString() ?? '') ?? 0;
+"""
+if old not in text:
+    raise SystemExit('clubTivi XtreamClient API base block changed upstream')
+text = text.replace(old, new, 1)
+text = text.replace(
+    '    return XtreamServerInfo.fromJson(response.data as Map<String, dynamic>);',
+    '    return XtreamServerInfo.fromJson(_jsonMap(response));',
+    1,
+)
+text = text.replace(
+    """    return (response.data as List)
+        .map((e) => XtreamCategory.fromJson(e as Map<String, dynamic>))
+        .toList();""",
+    """    return _jsonList(response)
+        .map((e) => XtreamCategory.fromJson(_entryMap(e)))
+        .toList();""",
+)
+text = text.replace(
+    """    return (response.data as List).map((e) {
+      final json = e as Map<String, dynamic>;""",
+    """    return _jsonList(response).map((e) {
+      final json = _entryMap(e);""",
+)
+text = text.replace(
+    """    final data = response.data as Map<String, dynamic>;
+    final listings = data['epg_listings'] as List? ?? [];
+    return listings
+        .map((e) => XtreamEpgEntry.fromJson(e as Map<String, dynamic>))
+        .toList();""",
+    """    final data = _jsonMap(response);
+    final listings = data['epg_listings'] as List? ?? [];
+    return listings
+        .map((e) => XtreamEpgEntry.fromJson(_entryMap(e)))
+        .toList();""",
+    1,
+)
+text = text.replace(
+    "    return '$baseUrl/live/$username/$password/$streamId.$extension';",
+    "    return '$_normalizedBaseUrl/live/$username/$password/$streamId.$extension';",
+    1,
+)
+text = text.replace(
+    "    return '$baseUrl/movie/$username/$password/$streamId.$extension';",
+    "    return '$_normalizedBaseUrl/movie/$username/$password/$streamId.$extension';",
+    1,
+)
+text = text.replace(
+    "    final streamId = json['stream_id'];",
+    "    final streamId = _streamId(json['stream_id']);",
+)
+text = text.replace(
+    "      streamUrl: buildLiveUrl(streamId as int),",
+    "      streamUrl: buildLiveUrl(streamId),",
+    1,
+)
+text = text.replace(
+    "      streamUrl: buildVodUrl(streamId as int, extension: ext),",
+    "      streamUrl: buildVodUrl(streamId, extension: ext),",
+    1,
+)
+text = text.replace(
+    "  bool get isActive => status == 'Active';",
+    "  bool get isActive => status?.toLowerCase() == 'active';",
+    1,
+)
+xtream.write_text(text, encoding='utf-8')
 
 # Keep Live TV scoped to the selected EMurph profile instead of merging users.
 channels = root / 'lib/features/channels/channels_screen.dart'

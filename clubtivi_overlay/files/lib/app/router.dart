@@ -4,6 +4,7 @@ import '../data/models/show.dart';
 import '../features/channels/channels_screen.dart';
 import '../features/emurph/emurph_catalog_screen.dart';
 import '../features/emurph/emurph_home_screen.dart';
+import '../features/emurph/emurph_radio_screen.dart';
 import '../features/emurph/emurph_users_screen.dart';
 import '../features/epg_mapping/epg_mapping_screen.dart';
 import '../features/guide/guide_screen.dart';
@@ -47,6 +48,10 @@ GoRouter createRouter() {
         builder: (context, state) => const EmurphCatalogScreen(
           kind: EmurphCatalogKind.series,
         ),
+      ),
+      GoRoute(
+        path: '/radio',
+        builder: (context, state) => const EmurphRadioScreen(),
       ),
       GoRoute(
         path: '/guide',
