@@ -21,7 +21,7 @@ class EmurphHomeScreen extends ConsumerStatefulWidget {
 class _EmurphHomeScreenState extends ConsumerState<EmurphHomeScreen> {
   static const double _artWidth = 815;
   static const double _artHeight = 617;
-  static const String _radioUrl = 'http://34.26.99.249:8080/';
+  static const String _radioUrl = 'https://radio.emurph.com/stream';
 
   String _profileName = 'Not logged in';
   String _expiration = 'Not available';

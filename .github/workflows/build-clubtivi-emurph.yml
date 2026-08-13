@@ -127,6 +127,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v2.0.2-test
+          target_commitish: ${{ github.sha }}
           name: EMurph TV 2.0.2 Test
           body: |
             Test-only EMurph TV build for Fire TV validation.
@@ -135,4 +136,5 @@ jobs:
             This is not marked as the latest production release.
           prerelease: true
           make_latest: false
+          overwrite_files: true
           files: EMurph-TV-2.0.2-Test.apk
